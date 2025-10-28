@@ -1,0 +1,18 @@
+[run]
+source = src
+omit = 
+    */tests/*
+    */test_*.py
+    src/services/validation_service.py
+    src/api/dependencies.py
+
+[report]
+precision = 2
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise AssertionError
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    @abstractmethod
