@@ -502,3 +502,158 @@ class TestCuttingGoalJourney:
             if trends["adjustment_suggestion"]:
                 assert "maintain" in trends["adjustment_suggestion"].lower()
 
+    def test_plan_generation(self, client: TestClient):
+        """Test training and diet plan generation on goal creation.
+
+        Validates:
+        - US5 all acceptance scenarios (1-4)
+        - Plans automatically generated when goal is created
+        - Training plan appropriate for goal type
+        - Diet plan macros calculated correctly
+        - Plans retrievable via API
+
+        Constitution: Principle III (integration test before implementation)
+        Flow:
+        1. Register → Login → Create measurement
+        2. Create cutting goal
+        3. Get training plan → Verify recommendations
+        4. Get diet plan → Verify macros
+        """
+        # Step 1: Register and login
+        user_data = {
+            "email": "plan.test@example.com",
+            "password": "SecurePass123!",
+            "full_name": "Plan Test User",
+            "date_of_birth": "1990-01-01",
+            "gender": "male",
+            "height_cm": 180.0,
+            "preferred_calculation_method": "navy",
+            "activity_level": "moderately_active",
+        }
+
+        register_response = client.post("/api/v1/users", json=user_data)
+        assert register_response.status_code == 201
+
+        login_response = client.post(
+            "/api/v1/auth/login",
+            json={
+                "email": user_data["email"],
+                "password": user_data["password"]
+            }
+        )
+        assert login_response.status_code == 200
+        tokens = login_response.json()
+        auth_headers = {"Authorization": f"Bearer {tokens['access_token']}"}
+
+        # Step 2: Create measurement
+        measurement_data = {
+            "weight_kg": 90.0,
+            "calculation_method": "navy",
+            "waist_cm": 95.0,
+            "neck_cm": 38.0,
+            "measured_at": "2025-10-23T10:00:00"
+        }
+
+        measurement_response = client.post(
+            "/api/v1/measurements",
+            json=measurement_data,
+            headers=auth_headers
+        )
+        assert measurement_response.status_code == 201
+        measurement = measurement_response.json()
+
+        # Step 3: Create cutting goal
+        goal_data = {
+            "goal_type": "cutting",
+            "initial_measurement_id": measurement["id"],
+            "target_body_fat_percentage": 15.0
+        }
+
+        goal_response = client.post(
+            "/api/v1/goals",
+            json=goal_data,
+            headers=auth_headers
+        )
+        assert goal_response.status_code == 201
+        goal = goal_response.json()
+        goal_id = goal["id"]
+
+        # Step 4: Get training plan
+        training_response = client.get(
+            f"/api/v1/goals/{goal_id}/training-plan",
+            headers=auth_headers
+        )
+        assert training_response.status_code == 200
+        training_plan = training_response.json()
+
+        # Validate training plan structure
+        assert "id" in training_plan
+        assert "goal_id" in training_plan
+        assert training_plan["goal_id"] == goal_id
+        assert "workout_frequency" in training_plan
+        assert training_plan["workout_frequency"] >= 2
+        assert "primary_focus" in training_plan
+        assert "plan_details" in training_plan
+
+        # Validate cutting-specific training plan
+        plan_details = training_plan["plan_details"]
+        assert "strength_training" in plan_details
+        assert "cardio" in plan_details
+
+        strength = plan_details["strength_training"]
+        assert "frequency" in strength
+        assert 3 <= strength["frequency"] <= 4  # Cutting: 3-4x/week
+        assert "exercises" in strength or "progression" in strength
+
+        cardio = plan_details["cardio"]
+        assert "frequency" in cardio
+        assert 2 <= cardio["frequency"] <= 3  # Cutting: 2-3x/week
+
+        # Step 5: Get diet plan
+        diet_response = client.get(
+            f"/api/v1/goals/{goal_id}/diet-plan",
+            headers=auth_headers
+        )
+        assert diet_response.status_code == 200
+        diet_plan = diet_response.json()
+
+        # Validate diet plan structure
+        assert "id" in diet_plan
+        assert "goal_id" in diet_plan
+        assert diet_plan["goal_id"] == goal_id
+        assert "daily_calorie_target" in diet_plan
+        assert "protein_grams" in diet_plan
+        assert "carbs_grams" in diet_plan
+        assert "fat_grams" in diet_plan
+        assert "guidelines" in diet_plan
+
+        # Validate calorie target matches goal recommendation
+        assert (
+            abs(diet_plan["daily_calorie_target"] - goal["target_calories"]) <= 50
+        )
+
+        # Validate macros
+        assert diet_plan["protein_grams"] > 0
+        assert diet_plan["carbs_grams"] > 0
+        assert diet_plan["fat_grams"] > 0
+
+        # Validate macro math
+        protein_cals = diet_plan["protein_grams"] * 4
+        carb_cals = diet_plan["carbs_grams"] * 4
+        fat_cals = diet_plan["fat_grams"] * 9
+        total_from_macros = protein_cals + carb_cals + fat_cals
+
+        # Should be within 100 calories
+        assert (
+            abs(total_from_macros - diet_plan["daily_calorie_target"]) <= 100
+        )
+
+        # Cutting should have high protein (2.2-2.6g/kg bodyweight)
+        # For 90kg at ~25% BF = ~67.5kg lean mass
+        # Expect ~148-175g protein
+        assert diet_plan["protein_grams"] >= 140
+
+        # Validate guidelines content
+        assert len(diet_plan["guidelines"]) > 0
+        assert "protein" in diet_plan["guidelines"].lower()
+

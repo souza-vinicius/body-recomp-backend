@@ -4,18 +4,19 @@ Tests progress calculation, trend analysis, and adjustment suggestions.
 Following Test-Last Development - written after implementation.
 """
 
-import pytest
 from datetime import datetime, timedelta
 from decimal import Decimal
-from uuid import uuid4
 from unittest.mock import AsyncMock, MagicMock
+from uuid import uuid4
 
-from src.services.progress_service import ProgressService
-from src.models.progress import ProgressEntry
+import pytest
+
+from src.models.enums import GoalType
 from src.models.goal import Goal
 from src.models.measurement import BodyMeasurement
-from src.models.enums import GoalType
+from src.models.progress import ProgressEntry
 from src.schemas.progress import TrendsResponse
+from src.services.progress_service import ProgressService
 
 
 class TestCalculateProgressPercentage:
@@ -24,7 +25,7 @@ class TestCalculateProgressPercentage:
     @pytest.mark.asyncio
     async def test_calculate_progress_cutting_25_to_20_percent(self):
         """Test progress from 25% to 20% BF in cutting goal.
-        
+
         Test Case: Progress from 25% to 20% BF
         Expected: 50% progress (halfway to 15% target)
         Constitution: Principle III
@@ -32,31 +33,31 @@ class TestCalculateProgressPercentage:
         # Mock database session
         db = AsyncMock()
         service = ProgressService(db)
-        
+
         # Create mock goal with initial measurement and progress entry
         goal_id = uuid4()
         initial_measurement = MagicMock(spec=BodyMeasurement)
         initial_measurement.calculated_body_fat_percentage = Decimal("25.0")
-        
+
         progress_entry = MagicMock(spec=ProgressEntry)
         progress_entry.body_fat_percentage = Decimal("20.0")
         progress_entry.week_number = 5
-        
+
         goal = MagicMock(spec=Goal)
         goal.id = goal_id
         goal.goal_type = GoalType.CUTTING
         goal.target_body_fat_percentage = Decimal("15.0")
         goal.initial_measurement = initial_measurement
         goal.progress_entries = [progress_entry]
-        
+
         # Mock database query
         mock_result = MagicMock()
         mock_result.scalar_one_or_none.return_value = goal
         db.execute.return_value = mock_result
-        
+
         # Calculate progress
         progress = await service.calculate_progress_percentage(goal_id)
-        
+
         # Verify: (25 - 20) / (25 - 15) * 100 = 50%
         assert progress == Decimal("50.0")
         db.execute.assert_called_once()
@@ -64,132 +65,132 @@ class TestCalculateProgressPercentage:
     @pytest.mark.asyncio
     async def test_calculate_progress_stalled(self):
         """Test progress calculation when stalled at starting BF.
-        
+
         Test Case: Progress stalled (no BF change)
         Expected: 0% progress
         """
         db = AsyncMock()
         service = ProgressService(db)
-        
+
         goal_id = uuid4()
         initial_measurement = MagicMock(spec=BodyMeasurement)
         initial_measurement.calculated_body_fat_percentage = Decimal("25.0")
-        
+
         progress_entry = MagicMock(spec=ProgressEntry)
         progress_entry.body_fat_percentage = Decimal("25.0")  # No change
         progress_entry.week_number = 3
-        
+
         goal = MagicMock(spec=Goal)
         goal.id = goal_id
         goal.goal_type = GoalType.CUTTING
         goal.target_body_fat_percentage = Decimal("15.0")
         goal.initial_measurement = initial_measurement
         goal.progress_entries = [progress_entry]
-        
+
         mock_result = MagicMock()
         mock_result.scalar_one_or_none.return_value = goal
         db.execute.return_value = mock_result
-        
+
         progress = await service.calculate_progress_percentage(goal_id)
-        
+
         # No progress made
         assert progress == Decimal("0.0")
 
     @pytest.mark.asyncio
     async def test_calculate_progress_goal_reached(self):
         """Test progress calculation when goal is reached.
-        
+
         Test Case: Goal reached (at target BF)
         Expected: 100% progress
         """
         db = AsyncMock()
         service = ProgressService(db)
-        
+
         goal_id = uuid4()
         initial_measurement = MagicMock(spec=BodyMeasurement)
         initial_measurement.calculated_body_fat_percentage = Decimal("25.0")
-        
+
         progress_entry = MagicMock(spec=ProgressEntry)
         progress_entry.body_fat_percentage = Decimal("15.0")  # At target
         progress_entry.week_number = 10
-        
+
         goal = MagicMock(spec=Goal)
         goal.id = goal_id
         goal.goal_type = GoalType.CUTTING
         goal.target_body_fat_percentage = Decimal("15.0")
         goal.initial_measurement = initial_measurement
         goal.progress_entries = [progress_entry]
-        
+
         mock_result = MagicMock()
         mock_result.scalar_one_or_none.return_value = goal
         db.execute.return_value = mock_result
-        
+
         progress = await service.calculate_progress_percentage(goal_id)
-        
+
         # Goal reached - 100% progress
         assert progress == Decimal("100.0")
 
     @pytest.mark.asyncio
     async def test_calculate_progress_exceeded_goal(self):
         """Test progress calculation when exceeded goal (capped at 100%).
-        
+
         Test Case: Progress exceeded (surpassed target)
         Expected: 100% progress (capped)
         """
         db = AsyncMock()
         service = ProgressService(db)
-        
+
         goal_id = uuid4()
         initial_measurement = MagicMock(spec=BodyMeasurement)
         initial_measurement.calculated_body_fat_percentage = Decimal("25.0")
-        
+
         progress_entry = MagicMock(spec=ProgressEntry)
         progress_entry.body_fat_percentage = Decimal("12.0")  # Below target
         progress_entry.week_number = 12
-        
+
         goal = MagicMock(spec=Goal)
         goal.id = goal_id
         goal.goal_type = GoalType.CUTTING
         goal.target_body_fat_percentage = Decimal("15.0")
         goal.initial_measurement = initial_measurement
         goal.progress_entries = [progress_entry]
-        
+
         mock_result = MagicMock()
         mock_result.scalar_one_or_none.return_value = goal
         db.execute.return_value = mock_result
-        
+
         progress = await service.calculate_progress_percentage(goal_id)
-        
+
         # Capped at 100%
         assert progress == Decimal("100.0")
 
     @pytest.mark.asyncio
     async def test_calculate_progress_no_entries(self):
         """Test progress calculation with no progress entries.
-        
+
         Test Case: No progress entries yet
         Expected: 0% progress
         """
         db = AsyncMock()
         service = ProgressService(db)
-        
+
         goal_id = uuid4()
         initial_measurement = MagicMock(spec=BodyMeasurement)
         initial_measurement.calculated_body_fat_percentage = Decimal("25.0")
-        
+
         goal = MagicMock(spec=Goal)
         goal.id = goal_id
         goal.goal_type = GoalType.CUTTING
         goal.target_body_fat_percentage = Decimal("15.0")
         goal.initial_measurement = initial_measurement
         goal.progress_entries = []  # No entries yet
-        
+
         mock_result = MagicMock()
         mock_result.scalar_one_or_none.return_value = goal
         db.execute.return_value = mock_result
-        
+
         progress = await service.calculate_progress_percentage(goal_id)
-        
+
         assert progress == Decimal("0.0")
 
 
@@ -199,19 +200,19 @@ class TestGetTrends:
     @pytest.mark.asyncio
     async def test_get_trends_decreasing_trend(self):
         """Test trend analysis with decreasing body fat (good progress).
-        
+
         Test Case: Decreasing trend (consistent BF loss)
         Expected: 'improving' trend classification
         Constitution: FR-019 (trend visualization)
         """
         db = AsyncMock()
         service = ProgressService(db)
-        
+
         goal_id = uuid4()
         initial_measurement = MagicMock(spec=BodyMeasurement)
         initial_measurement.calculated_body_fat_percentage = Decimal("25.0")
         initial_measurement.measured_at = datetime.now() - timedelta(days=28)
-        
+
         # Create 4 weeks of decreasing body fat
         progress_entries = []
         for week in range(1, 5):
@@ -224,20 +225,20 @@ class TestGetTrends:
             entry.is_on_track = True  # Good progress
             entry.logged_at = datetime.now() - timedelta(days=28 - (week * 7))
             progress_entries.append(entry)
-        
+
         goal = MagicMock(spec=Goal)
         goal.id = goal_id
         goal.goal_type = GoalType.CUTTING
         goal.target_body_fat_percentage = Decimal("15.0")
         goal.initial_measurement = initial_measurement
         goal.progress_entries = progress_entries
-        
+
         mock_result = MagicMock()
         mock_result.scalar_one_or_none.return_value = goal
         db.execute.return_value = mock_result
-        
+
         trends = await service.get_trends(goal_id)
-        
+
         # Verify response structure
         assert isinstance(trends, TrendsResponse)
         assert trends.trend == "improving"
@@ -249,18 +250,18 @@ class TestGetTrends:
     @pytest.mark.asyncio
     async def test_get_trends_plateau_detection(self):
         """Test trend analysis with plateau (no progress).
-        
+
         Test Case: Plateau detection (BF not changing)
         Expected: 'plateau' trend classification
         """
         db = AsyncMock()
         service = ProgressService(db)
-        
+
         goal_id = uuid4()
         initial_measurement = MagicMock(spec=BodyMeasurement)
         initial_measurement.calculated_body_fat_percentage = Decimal("25.0")
         initial_measurement.measured_at = datetime.now() - timedelta(days=28)
-        
+
         # Create 4 weeks with minimal changes (plateau)
         progress_entries = []
         for week in range(1, 5):
@@ -273,20 +274,20 @@ class TestGetTrends:
             entry.is_on_track = False  # Not on track
             entry.logged_at = datetime.now() - timedelta(days=28 - (week * 7))
             progress_entries.append(entry)
-        
+
         goal = MagicMock(spec=Goal)
         goal.id = goal_id
         goal.goal_type = GoalType.CUTTING
         goal.target_body_fat_percentage = Decimal("15.0")
         goal.initial_measurement = initial_measurement
         goal.progress_entries = progress_entries
-        
+
         mock_result = MagicMock()
         mock_result.scalar_one_or_none.return_value = goal
         db.execute.return_value = mock_result
-        
+
         trends = await service.get_trends(goal_id)
-        
+
         assert trends.trend == "plateau"
         # is_on_track is False when < 60% of entries are on_track (all are False here)
         assert trends.is_on_track is False
@@ -297,24 +298,24 @@ class TestGetTrends:
     @pytest.mark.asyncio
     async def test_get_trends_weekly_average_calculation(self):
         """Test weekly average calculations are correct.
-        
+
         Test Case: Verify average calculations over 4+ weeks
         Expected: Correct weekly averages
         """
         db = AsyncMock()
         service = ProgressService(db)
-        
+
         goal_id = uuid4()
         initial_measurement = MagicMock(spec=BodyMeasurement)
         initial_measurement.calculated_body_fat_percentage = Decimal("25.0")
         initial_measurement.measured_at = datetime.now() - timedelta(days=35)
-        
+
         # Create 5 weeks with known changes
-        bf_changes = [Decimal("-1.0"), Decimal("-0.8"), Decimal("-0.9"), 
+        bf_changes = [Decimal("-1.0"), Decimal("-0.8"), Decimal("-0.9"),
                       Decimal("-0.7"), Decimal("-0.6")]
-        weight_changes = [Decimal("-1.5"), Decimal("-1.2"), Decimal("-1.0"), 
+        weight_changes = [Decimal("-1.5"), Decimal("-1.2"), Decimal("-1.0"),
                          Decimal("-0.8"), Decimal("-1.0")]
-        
+
         progress_entries = []
         current_bf = Decimal("25.0")
         current_weight = Decimal("80.0")
@@ -332,42 +333,42 @@ class TestGetTrends:
             entry.is_on_track = True
             entry.logged_at = datetime.now() - timedelta(days=35 - (week * 7))
             progress_entries.append(entry)
-        
+
         goal = MagicMock(spec=Goal)
         goal.id = goal_id
         goal.goal_type = GoalType.CUTTING
         goal.target_body_fat_percentage = Decimal("15.0")
         goal.initial_measurement = initial_measurement
         goal.progress_entries = progress_entries
-        
+
         mock_result = MagicMock()
         mock_result.scalar_one_or_none.return_value = goal
         db.execute.return_value = mock_result
-        
+
         trends = await service.get_trends(goal_id)
-        
+
         # Verify averages: (-1.0 + -0.8 + -0.9 + -0.7 + -0.6) / 5 = -0.8
         expected_bf_avg = sum(bf_changes) / len(bf_changes)
         expected_weight_avg = sum(weight_changes) / len(weight_changes)
-        
+
         assert abs(float(trends.weekly_bf_change_avg) - float(expected_bf_avg)) < 0.01
         assert abs(float(trends.weekly_weight_change_avg) - float(expected_weight_avg)) < 0.01
 
     @pytest.mark.asyncio
     async def test_get_trends_insufficient_data(self):
         """Test trend analysis with insufficient data (< 3 entries).
-        
+
         Test Case: Only 2 progress entries
         Expected: 'insufficient_data' trend classification
         """
         db = AsyncMock()
         service = ProgressService(db)
-        
+
         goal_id = uuid4()
         initial_measurement = MagicMock(spec=BodyMeasurement)
         initial_measurement.calculated_body_fat_percentage = Decimal("25.0")
         initial_measurement.measured_at = datetime.now() - timedelta(days=14)
-        
+
         # Only 2 entries - insufficient for trend analysis
         progress_entries = []
         for week in range(1, 3):
@@ -380,20 +381,20 @@ class TestGetTrends:
             entry.is_on_track = True
             entry.logged_at = datetime.now() - timedelta(days=14 - (week * 7))
             progress_entries.append(entry)
-        
+
         goal = MagicMock(spec=Goal)
         goal.id = goal_id
         goal.goal_type = GoalType.CUTTING
         goal.target_body_fat_percentage = Decimal("15.0")
         goal.initial_measurement = initial_measurement
         goal.progress_entries = progress_entries
-        
+
         mock_result = MagicMock()
         mock_result.scalar_one_or_none.return_value = goal
         db.execute.return_value = mock_result
-        
+
         trends = await service.get_trends(goal_id)
-        
+
         assert trends.trend == "insufficient_data"
         # Insufficient data has a suggestion to keep logging
         assert trends.adjustment_suggestion is not None
@@ -406,19 +407,19 @@ class TestSuggestAdjustments:
     @pytest.mark.asyncio
     async def test_suggest_adjustments_on_track_no_adjustment(self):
         """Test no adjustment suggestion when on track.
-        
+
         Test Case: On-track progress (losing 0.5-1.0% BF/week)
         Expected: No adjustment needed
         Constitution: US2 Acceptance #4
         """
         db = AsyncMock()
         service = ProgressService(db)
-        
+
         goal_id = uuid4()
         initial_measurement = MagicMock(spec=BodyMeasurement)
         initial_measurement.calculated_body_fat_percentage = Decimal("25.0")
         initial_measurement.measured_at = datetime.now() - timedelta(days=21)
-        
+
         # Good progress: -0.7% BF per week (in optimal range)
         progress_entries = []
         for week in range(1, 4):
@@ -431,20 +432,20 @@ class TestSuggestAdjustments:
             entry.is_on_track = True  # On track
             entry.logged_at = datetime.now() - timedelta(days=21 - (week * 7))
             progress_entries.append(entry)
-        
+
         goal = MagicMock(spec=Goal)
         goal.id = goal_id
         goal.goal_type = GoalType.CUTTING
         goal.target_body_fat_percentage = Decimal("15.0")
         goal.initial_measurement = initial_measurement
         goal.progress_entries = progress_entries
-        
+
         mock_result = MagicMock()
         mock_result.scalar_one_or_none.return_value = goal
         db.execute.return_value = mock_result
-        
+
         trends = await service.get_trends(goal_id)
-        
+
         assert trends.is_on_track is True
         # On track progress should have no adjustment or positive reinforcement
         if trends.adjustment_suggestion:
@@ -454,18 +455,18 @@ class TestSuggestAdjustments:
     @pytest.mark.asyncio
     async def test_suggest_adjustments_slow_progress_increase_deficit(self):
         """Test suggestion to increase deficit when progress is slow.
-        
+
         Test Case: Slow progress (< 0.4% BF loss/week)
         Expected: Suggest increasing caloric deficit
         """
         db = AsyncMock()
         service = ProgressService(db)
-        
+
         goal_id = uuid4()
         initial_measurement = MagicMock(spec=BodyMeasurement)
         initial_measurement.calculated_body_fat_percentage = Decimal("25.0")
         initial_measurement.measured_at = datetime.now() - timedelta(days=21)
-        
+
         # Slow progress: only -0.15% BF per week (below -0.2 threshold)
         progress_entries = []
         for week in range(1, 4):
@@ -478,42 +479,42 @@ class TestSuggestAdjustments:
             entry.is_on_track = False  # Not meeting expected rate
             entry.logged_at = datetime.now() - timedelta(days=21 - (week * 7))
             progress_entries.append(entry)
-        
+
         goal = MagicMock(spec=Goal)
         goal.id = goal_id
         goal.goal_type = GoalType.CUTTING
         goal.target_body_fat_percentage = Decimal("15.0")
         goal.initial_measurement = initial_measurement
         goal.progress_entries = progress_entries
-        
+
         mock_result = MagicMock()
         mock_result.scalar_one_or_none.return_value = goal
         db.execute.return_value = mock_result
-        
+
         trends = await service.get_trends(goal_id)
-        
+
         assert trends.is_on_track is False
         assert trends.adjustment_suggestion is not None
         # Should suggest increasing deficit (more cardio or reduce calories)
         suggestion_lower = trends.adjustment_suggestion.lower()
-        assert any(word in suggestion_lower for word in 
+        assert any(word in suggestion_lower for word in
                    ["increase", "deficit", "calories", "cardio"])
 
     @pytest.mark.asyncio
     async def test_suggest_adjustments_fast_progress_reduce_deficit(self):
         """Test suggestion to reduce deficit when progress is too fast.
-        
+
         Test Case: Fast progress (> 1.2% BF loss/week)
         Expected: Suggest reducing caloric deficit
         """
         db = AsyncMock()
         service = ProgressService(db)
-        
+
         goal_id = uuid4()
         initial_measurement = MagicMock(spec=BodyMeasurement)
         initial_measurement.calculated_body_fat_percentage = Decimal("25.0")
         initial_measurement.measured_at = datetime.now() - timedelta(days=21)
-        
+
         # Too fast progress: -1.5% BF per week (above optimal, risk muscle loss)
         progress_entries = []
         for week in range(1, 4):
@@ -526,42 +527,42 @@ class TestSuggestAdjustments:
             entry.is_on_track = False  # Too fast is also off-track
             entry.logged_at = datetime.now() - timedelta(days=21 - (week * 7))
             progress_entries.append(entry)
-        
+
         goal = MagicMock(spec=Goal)
         goal.id = goal_id
         goal.goal_type = GoalType.CUTTING
         goal.target_body_fat_percentage = Decimal("15.0")
         goal.initial_measurement = initial_measurement
         goal.progress_entries = progress_entries
-        
+
         mock_result = MagicMock()
         mock_result.scalar_one_or_none.return_value = goal
         db.execute.return_value = mock_result
-        
+
         trends = await service.get_trends(goal_id)
-        
+
         assert trends.is_on_track is False  # Too fast is also "off track"
         assert trends.adjustment_suggestion is not None
         # Should suggest slowing down (increase calories or reduce cardio)
         suggestion_lower = trends.adjustment_suggestion.lower()
-        assert any(word in suggestion_lower for word in 
+        assert any(word in suggestion_lower for word in
                    ["slow", "reduce", "increase calories", "muscle"])
 
     @pytest.mark.asyncio
     async def test_suggest_adjustments_worsening_trend(self):
         """Test suggestion when body fat is increasing (gaining).
-        
+
         Test Case: Worsening trend (BF increasing)
         Expected: Suggest reviewing nutrition and training
         """
         db = AsyncMock()
         service = ProgressService(db)
-        
+
         goal_id = uuid4()
         initial_measurement = MagicMock(spec=BodyMeasurement)
         initial_measurement.calculated_body_fat_percentage = Decimal("25.0")
         initial_measurement.measured_at = datetime.now() - timedelta(days=21)
-        
+
         # Worsening: BF is increasing instead of decreasing (plateau in cutting)
         # Note: In the implementation, positive BF change classifies as "plateau" not "worsening"
         progress_entries = []
@@ -575,25 +576,176 @@ class TestSuggestAdjustments:
             entry.is_on_track = False
             entry.logged_at = datetime.now() - timedelta(days=21 - (week * 7))
             progress_entries.append(entry)
-        
+
         goal = MagicMock(spec=Goal)
         goal.id = goal_id
         goal.goal_type = GoalType.CUTTING
         goal.target_body_fat_percentage = Decimal("15.0")
         goal.initial_measurement = initial_measurement
         goal.progress_entries = progress_entries
-        
+
         mock_result = MagicMock()
         mock_result.scalar_one_or_none.return_value = goal
         db.execute.return_value = mock_result
-        
+
         trends = await service.get_trends(goal_id)
-        
+
         # Positive BF change in cutting goal classifies as "plateau" not "worsening"
         assert trends.trend == "plateau"
         assert trends.is_on_track is False
         assert trends.adjustment_suggestion is not None
         # Should suggest increasing deficit
         suggestion_lower = trends.adjustment_suggestion.lower()
-        assert any(word in suggestion_lower for word in 
+        assert any(word in suggestion_lower for word in
                    ["deficit", "increase", "calories", "cardio"])
+
+
+class TestCheckBulkingCeiling:
+    """Test bulking ceiling checks (T071)."""
+
+    @pytest.mark.asyncio
+    async def test_check_bulking_ceiling_within_safe_range(self):
+        """Test ceiling check when well below ceiling (no warning).
+
+        Test Case: Current BF 14%, ceiling 18% (4% remaining)
+        Expected: No warning, should_complete = False
+        Constitution: Principle III, FR-020
+        """
+        db = AsyncMock()
+        service = ProgressService(db)
+
+        goal = MagicMock(spec=Goal)
+        goal.goal_type = GoalType.BULKING
+        goal.ceiling_body_fat_percentage = Decimal("18.0")
+
+        warning, should_complete = await service.check_bulking_ceiling(
+            current_bf=Decimal("14.0"),
+            ceiling_bf=Decimal("18.0"),
+            goal=goal
+        )
+
+        assert warning is None
+        assert should_complete is False
+
+    @pytest.mark.asyncio
+    async def test_check_bulking_ceiling_within_one_percent(self):
+        """Test ceiling check when within 1% of ceiling (warning).
+
+        Test Case: Current BF 17.2%, ceiling 18% (0.8% remaining)
+        Expected: Warning message, should_complete = False
+        Constitution: Principle III, FR-020, US4 Acceptance #2
+        """
+        db = AsyncMock()
+        service = ProgressService(db)
+
+        goal = MagicMock(spec=Goal)
+        goal.goal_type = GoalType.BULKING
+        goal.ceiling_body_fat_percentage = Decimal("18.0")
+
+        warning, should_complete = await service.check_bulking_ceiling(
+            current_bf=Decimal("17.2"),
+            ceiling_bf=Decimal("18.0"),
+            goal=goal
+        )
+
+        assert warning is not None
+        assert "Approaching ceiling" in warning
+        assert "0.8%" in warning
+        assert should_complete is False
+
+    @pytest.mark.asyncio
+    async def test_check_bulking_ceiling_at_ceiling(self):
+        """Test ceiling check when exactly at ceiling (complete goal).
+
+        Test Case: Current BF 18.0%, ceiling 18.0% (0% remaining)
+        Expected: Completion message, should_complete = True
+        Constitution: Principle III, FR-013, US4 Acceptance #3
+        """
+        db = AsyncMock()
+        service = ProgressService(db)
+
+        goal = MagicMock(spec=Goal)
+        goal.goal_type = GoalType.BULKING
+        goal.ceiling_body_fat_percentage = Decimal("18.0")
+
+        warning, should_complete = await service.check_bulking_ceiling(
+            current_bf=Decimal("18.0"),
+            ceiling_bf=Decimal("18.0"),
+            goal=goal
+        )
+
+        assert warning is not None
+        assert "Ceiling reached" in warning
+        assert "complete" in warning.lower()
+        assert should_complete is True
+
+    @pytest.mark.asyncio
+    async def test_check_bulking_ceiling_above_ceiling(self):
+        """Test ceiling check when above ceiling (complete goal).
+
+        Test Case: Current BF 18.5%, ceiling 18.0% (-0.5% remaining)
+        Expected: Completion message, should_complete = True
+        Constitution: Principle III, FR-013
+        """
+        db = AsyncMock()
+        service = ProgressService(db)
+
+        goal = MagicMock(spec=Goal)
+        goal.goal_type = GoalType.BULKING
+        goal.ceiling_body_fat_percentage = Decimal("18.0")
+
+        warning, should_complete = await service.check_bulking_ceiling(
+            current_bf=Decimal("18.5"),
+            ceiling_bf=Decimal("18.0"),
+            goal=goal
+        )
+
+        assert warning is not None
+        assert "Ceiling reached" in warning
+        assert should_complete is True
+
+
+class TestCheckBulkingRate:
+    """Test bulking rate checks (T072)."""
+
+    @pytest.mark.asyncio
+    async def test_check_bulking_rate_healthy_rate(self):
+        """Test rate check with healthy gain rate (no warning).
+
+        Test Case: 0.3%/week gain (within 0.1-0.3% ideal range)
+        Expected: No warning
+        Constitution: Principle III, US4 Acceptance #4
+        """
+        db = AsyncMock()
+        service = ProgressService(db)
+
+        warning = await service.check_bulking_rate(
+            previous_bf=Decimal("14.0"),
+            current_bf=Decimal("14.3"),
+            weeks=1
+        )
+
+        assert warning is None
+
+    @pytest.mark.asyncio
+    async def test_check_bulking_rate_too_fast(self):
+        """Test rate check with excessive gain rate (warning).
+
+        Test Case: 0.8%/week gain (exceeds 0.5%/week threshold)
+        Expected: Warning to slow down bulk
+        Constitution: Principle III, US4 Acceptance #4
+        """
+        db = AsyncMock()
+        service = ProgressService(db)
+
+        warning = await service.check_bulking_rate(
+            previous_bf=Decimal("14.0"),
+            current_bf=Decimal("14.8"),
+            weeks=1
+        )
+
+        assert warning is not None
+        assert "too quickly" in warning.lower()
+        assert "0.8" in warning or "0.80" in warning
+        assert "reducing" in warning.lower() or "reduce" in warning.lower()
+        assert "surplus" in warning.lower()

@@ -204,6 +204,82 @@ class TestGoalCreation:
         assert "detail" in data
         assert "active" in data["detail"].lower()
 
+    async def test_bulking_ceiling_alert(
+        self, client: TestClient, auth_headers: dict
+    ):
+        """
+        Test bulking goal creation with ceiling validation.
+
+        T056: Contract test for goal ceiling alert
+
+        Validates:
+        - GoalResponse includes validation for ceiling
+        - Ceiling must be higher than current body fat
+        - Ceiling must be within safe limits
+        - US3 Acceptance #4: Alert when reaching ceiling
+
+        Constitution: Principle III, Principle I
+        Functional Requirements: FR-017 (safety limits)
+        """
+        # First create a measurement at ~14-15% BF
+        from datetime import datetime
+
+        measurement_data = {
+            "weight_kg": 75.0,
+            "calculation_method": "navy",
+            "waist_cm": 75.0,  # Lower waist for lower BF%
+            "neck_cm": 40.0,  # Higher neck for lower BF%
+            "measured_at": datetime.now().isoformat(),
+        }
+        measurement_response = await client.post(
+            "/api/v1/measurements",
+            json=measurement_data,
+            headers=auth_headers,
+        )
+        assert measurement_response.status_code == 201
+        measurement_id = measurement_response.json()["id"]
+
+        # Test 1: Ceiling too low (below current BF) should fail
+        goal_data_low = {
+            "goal_type": "bulking",
+            "initial_measurement_id": measurement_id,
+            "ceiling_body_fat_percentage": 10.0,  # Below current
+        }
+        response_low = await client.post(
+            "/api/v1/goals",
+            json=goal_data_low,
+            headers=auth_headers,
+        )
+        assert response_low.status_code == 400  # Business rule validation
+
+        # Test 2: Ceiling too high (unsafe) should fail
+        goal_data_high = {
+            "goal_type": "bulking",
+            "initial_measurement_id": measurement_id,
+            "ceiling_body_fat_percentage": 35.0,  # Too high for male
+        }
+        response_high = await client.post(
+            "/api/v1/goals",
+            json=goal_data_high,
+            headers=auth_headers,
+        )
+        assert response_high.status_code == 400  # Business rule validation
+
+        # Test 3: Valid ceiling should succeed
+        goal_data_valid = {
+            "goal_type": "bulking",
+            "initial_measurement_id": measurement_id,
+            "ceiling_body_fat_percentage": 18.0,  # Safe range
+        }
+        response_valid = await client.post(
+            "/api/v1/goals",
+            json=goal_data_valid,
+            headers=auth_headers,
+        )
+        assert response_valid.status_code == 201
+        data = response_valid.json()
+        assert data["ceiling_body_fat_percentage"] == 18.0
+
 
 class TestGoalRetrieval:
     """Contract tests for GET /api/v1/goals/{id}."""

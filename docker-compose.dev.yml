@@ -3,7 +3,7 @@ version: '3.8'
 services:
   db:
     image: postgres:15-alpine
-    container_name: body-recomp-db
+    container_name: body-recomp-db-dev
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
@@ -11,48 +11,40 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_dev:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
-    restart: unless-stopped
     networks:
-      - body-recomp-network
+      - body-recomp-network-dev
 
   api:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: body-recomp-api
-    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000
+    container_name: body-recomp-api-dev
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - .:/app
     ports:
       - "8000:8000"
     env_file:
       - .env
     environment:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-body_recomp}
-      SECRET_KEY: ${SECRET_KEY}
-      DEBUG: ${DEBUG:-false}
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+      DEBUG: "true"
     depends_on:
       db:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    restart: unless-stopped
     networks:
-      - body-recomp-network
+      - body-recomp-network-dev
 
 volumes:
-  postgres_data:
+  postgres_data_dev:
     driver: local
 
 networks:
-  body-recomp-network:
+  body-recomp-network-dev:
     driver: bridge

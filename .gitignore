@@ -86,3 +86,7 @@ alembic/versions/*.pyc
 .idea/
 *.sublime-*
 .vscode/
+
+
+#Ignore insiders AI rules
+.github/instructions/codacy.instructions.md

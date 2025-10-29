@@ -5,17 +5,18 @@ Handles business logic for creating and managing body recomposition goals.
 """
 from datetime import datetime
 from decimal import Decimal
-from typing import Optional
 from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.models.enums import ActivityLevel, Gender, GoalStatus, GoalType
 from src.models.goal import Goal
-from src.models.user import User
 from src.models.measurement import BodyMeasurement
-from src.models.enums import GoalType, GoalStatus, Gender, ActivityLevel
+from src.models.plan import DietPlan, TrainingPlan
+from src.models.user import User
 from src.schemas.goal import GoalCreate
+from src.services.plan_generator import PlanGenerator
 
 
 class GoalService:
@@ -30,10 +31,10 @@ class GoalService:
     ) -> int:
         """
         Calculate Basal Metabolic Rate using Mifflin-St Jeor equation.
-        
+
         Men: BMR = 10 × weight(kg) + 6.25 × height(cm) - 5 × age + 5
         Women: BMR = 10 × weight(kg) + 6.25 × height(cm) - 5 × age - 161
-        
+
         Returns BMR rounded to nearest integer calorie.
         """
         bmr = (
@@ -41,26 +42,26 @@ class GoalService:
             + 6.25 * float(height_cm)
             - 5 * age_years
         )
-        
+
         if gender == Gender.MALE:
             bmr += 5
         else:  # Gender.FEMALE
             bmr -= 161
-        
+
         return round(bmr)
 
     @staticmethod
     def calculate_tdee(bmr: int, activity_level: ActivityLevel) -> int:
         """
         Calculate Total Daily Energy Expenditure.
-        
+
         Applies activity multiplier to BMR:
         - Sedentary: BMR × 1.2
         - Lightly active: BMR × 1.375
         - Moderately active: BMR × 1.55
         - Very active: BMR × 1.725
         - Extremely active: BMR × 1.9
-        
+
         Returns TDEE rounded to nearest integer calorie.
         """
         multipliers = {
@@ -70,7 +71,7 @@ class GoalService:
             ActivityLevel.VERY_ACTIVE: 1.725,
             ActivityLevel.EXTREMELY_ACTIVE: 1.9,
         }
-        
+
         tdee = bmr * multipliers[activity_level]
         return round(tdee)
 
@@ -82,29 +83,29 @@ class GoalService:
     ) -> int:
         """
         Calculate target calories for cutting goal.
-        
+
         Applies 300-500 calorie deficit (default 400).
         Enforces minimum safe limits:
         - Men: 1500 cal/day minimum
         - Women: 1200 cal/day minimum
-        
+
         Returns target calories rounded to nearest integer.
         """
         target = tdee - deficit
-        
+
         # Enforce minimum safe limits
         minimum = 1500 if gender == Gender.MALE else 1200
-        
+
         return max(target, minimum)
 
     @staticmethod
     def calculate_bulking_calories(tdee: int, surplus: int = 250) -> int:
         """
         Calculate target calories for bulking goal.
-        
+
         Applies 200-300 calorie surplus (default 250).
         Conservative surplus minimizes fat gain.
-        
+
         Returns target calories rounded to nearest integer.
         """
         return tdee + surplus
@@ -117,12 +118,12 @@ class GoalService:
     ) -> int:
         """
         Estimate weeks to reach cutting goal.
-        
+
         Uses evidence-based rate of 0.5-1% body fat decrease per month.
         Default: 0.75% per month (conservative middle ground).
-        
+
         Formula: weeks = (current - target) / (rate / 4.33 weeks/month)
-        
+
         Returns estimated weeks, rounded to nearest integer.
         """
         bf_difference = float(current_bf - target_bf)
@@ -138,12 +139,12 @@ class GoalService:
     ) -> int:
         """
         Estimate weeks to reach bulking ceiling.
-        
+
         Uses conservative rate of 0.1-0.3% body fat increase per month.
         Default: 0.2% per month.
-        
+
         Formula: weeks = (ceiling - current) / (rate / 4.33 weeks/month)
-        
+
         Returns estimated weeks, rounded to nearest integer.
         """
         bf_difference = float(ceiling_bf - current_bf)
@@ -155,21 +156,21 @@ class GoalService:
     async def validate_goal_safety(
         goal_type: GoalType,
         current_bf: Decimal,
-        target_bf: Optional[Decimal],
-        ceiling_bf: Optional[Decimal],
+        target_bf: Decimal | None,
+        ceiling_bf: Decimal | None,
         gender: Gender,
     ) -> None:
         """
         Validate goal meets safety requirements (FR-017).
-        
+
         Cutting goals:
         - Target must be >= 8% (men) or >= 15% (women)
         - Target must be < current body fat
-        
+
         Bulking goals:
         - Ceiling must be <= 30%
         - Ceiling must be > current body fat
-        
+
         Raises ValueError if unsafe.
         """
         if goal_type == GoalType.CUTTING:
@@ -177,7 +178,7 @@ class GoalService:
                 raise ValueError(
                     "target_body_fat_percentage required for cutting goals"
                 )
-            
+
             # Check minimum safe body fat
             min_bf = Decimal("8.0") if gender == Gender.MALE else Decimal("15.0")
             if target_bf < min_bf:
@@ -185,26 +186,26 @@ class GoalService:
                     f"Target body fat too low. "
                     f"Minimum safe level is {min_bf}% for {gender.value}s"
                 )
-            
+
             # Check target < current
             if target_bf >= current_bf:
                 raise ValueError(
                     "Target body fat must be lower than current body fat "
                     "for cutting goals"
                 )
-        
+
         elif goal_type == GoalType.BULKING:
             if ceiling_bf is None:
                 raise ValueError(
                     "ceiling_body_fat_percentage required for bulking goals"
                 )
-            
+
             # Check maximum safe body fat
             if ceiling_bf > Decimal("30.0"):
                 raise ValueError(
                     "Ceiling body fat too high. Maximum safe level is 30%"
                 )
-            
+
             # Check ceiling > current
             if ceiling_bf <= current_bf:
                 raise ValueError(
@@ -219,7 +220,7 @@ class GoalService:
     ) -> bool:
         """
         Check if user has an active goal (FR-018).
-        
+
         Returns True if active goal exists, False otherwise.
         """
         result = await db.execute(
@@ -237,19 +238,23 @@ class GoalService:
     ) -> Goal:
         """
         Create a new body recomposition goal.
-        
+
         Validates:
         - Initial measurement exists and belongs to user
         - No other active goals exist (FR-018)
         - Goal is safe based on target/ceiling (FR-017)
-        
+
         Calculates:
         - BMR using Mifflin-St Jeor
         - TDEE based on activity level
         - Target calories with appropriate deficit/surplus
         - Timeline estimation
-        
-        Returns created Goal with all calculated fields.
+
+        Generates:
+        - Training plan tailored to goal type
+        - Diet plan with macro breakdown
+
+        Returns created Goal with all calculated fields and plans.
         """
         # Check for existing active goal (FR-018)
         has_active = await self.check_active_goal_exists(db, user_id)
@@ -258,7 +263,7 @@ class GoalService:
                 "User already has an active goal. "
                 "Complete or cancel existing goal before creating a new one."
             )
-        
+
         # Get user
         result = await db.execute(
             select(User).where(User.id == user_id)
@@ -266,7 +271,7 @@ class GoalService:
         user = result.scalar_one_or_none()
         if not user:
             raise ValueError("User not found")
-        
+
         # Get initial measurement
         result = await db.execute(
             select(BodyMeasurement)
@@ -275,13 +280,13 @@ class GoalService:
         measurement = result.scalar_one_or_none()
         if not measurement:
             raise ValueError("Initial measurement not found")
-        
+
         # Verify measurement belongs to user
         if measurement.user_id != user_id:
             raise ValueError(
                 "Initial measurement does not belong to this user"
             )
-        
+
         # Validate goal safety (FR-017)
         await self.validate_goal_safety(
             goal_data.goal_type,
@@ -290,10 +295,10 @@ class GoalService:
             goal_data.ceiling_body_fat_percentage,
             user.gender,
         )
-        
+
         # Calculate age from date of birth
         age = (datetime.utcnow() - user.date_of_birth).days // 365
-        
+
         # Calculate BMR and TDEE
         bmr = self.calculate_bmr(
             measurement.weight_kg,
@@ -302,7 +307,7 @@ class GoalService:
             user.gender,
         )
         tdee = self.calculate_tdee(bmr, user.activity_level)
-        
+
         # Calculate target calories based on goal type
         if goal_data.goal_type == GoalType.CUTTING:
             target_calories = self.calculate_cutting_calories(
@@ -319,7 +324,7 @@ class GoalService:
                 measurement.calculated_body_fat_percentage,
                 goal_data.ceiling_body_fat_percentage,
             )
-        
+
         # Create goal
         goal = Goal(
             user_id=user_id,
@@ -342,11 +347,54 @@ class GoalService:
             created_at=datetime.utcnow(),
             updated_at=datetime.utcnow(),
         )
-        
+
         db.add(goal)
         await db.flush()
         await db.refresh(goal)
-        
+
+        # Generate training and diet plans
+        plan_generator = PlanGenerator()
+
+        # Generate training plan
+        training_plan_data = plan_generator.generate_training_plan(goal)
+        training_plan = TrainingPlan(
+            goal_id=goal.id,
+            plan_details=training_plan_data,
+            workout_frequency=training_plan_data["strength_training"]["frequency"],
+            primary_focus=(
+                "Fat Loss & Muscle Preservation"
+                if goal.goal_type == GoalType.CUTTING
+                else "Muscle Growth & Strength"
+            ),
+            notes=(
+                "Focus on maintaining strength during deficit"
+                if goal.goal_type == GoalType.CUTTING
+                else "Progressive overload for hypertrophy"
+            ),
+        )
+        db.add(training_plan)
+
+        # Generate diet plan
+        diet_plan_data = plan_generator.generate_diet_plan(
+            goal, user, measurement.weight_kg
+        )
+        diet_plan = DietPlan(
+            goal_id=goal.id,
+            daily_calorie_target=diet_plan_data["daily_calorie_target"],
+            protein_grams=diet_plan_data["protein_grams"],
+            carbs_grams=diet_plan_data["carbs_grams"],
+            fat_grams=diet_plan_data["fat_grams"],
+            meal_timing=diet_plan_data["meal_timing"],
+            guidelines=diet_plan_data["guidelines"],
+        )
+        db.add(diet_plan)
+
+        # Commit all changes
+        await db.commit()
+        await db.refresh(goal)
+        await db.refresh(training_plan)
+        await db.refresh(diet_plan)
+
         return goal
 
     async def check_goal_completion(
@@ -357,12 +405,12 @@ class GoalService:
     ) -> bool:
         """
         Check if goal has been completed and update status if so.
-        
+
         Args:
             db: Database session
             goal_id: Goal to check
             current_body_fat: Current body fat percentage from latest entry
-            
+
         Returns:
             True if goal was completed, False otherwise
         """
@@ -370,28 +418,28 @@ class GoalService:
             select(Goal).where(Goal.id == goal_id)
         )
         goal = result.scalar_one_or_none()
-        
+
         if not goal or goal.status != GoalStatus.ACTIVE:
             return False
-        
+
         completed = False
-        
+
         if goal.goal_type == GoalType.CUTTING:
             # Cutting goal is complete when current BF <= target BF
-            if (goal.target_body_fat_percentage and 
+            if (goal.target_body_fat_percentage and
                 current_body_fat <= goal.target_body_fat_percentage):
                 completed = True
         else:
             # Bulking goal is complete when current BF >= ceiling BF
-            if (goal.ceiling_body_fat_percentage and 
+            if (goal.ceiling_body_fat_percentage and
                 current_body_fat >= goal.ceiling_body_fat_percentage):
                 completed = True
-        
+
         if completed:
             goal.status = GoalStatus.COMPLETED
             goal.completed_at = datetime.utcnow()
             await db.commit()
             await db.refresh(goal)
             return True
-        
+
         return False

@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, field_validator
 
 class ProgressEntryCreate(BaseModel):
     """Schema for creating a new progress entry.
-    
+
     Attributes:
         measurement_id: ID of the measurement to log as progress
         notes: Optional user notes about this week's progress
@@ -38,7 +38,7 @@ class ProgressEntryCreate(BaseModel):
 
 class ProgressEntryResponse(BaseModel):
     """Schema for progress entry response.
-    
+
     Attributes:
         id: Progress entry ID
         goal_id: Associated goal ID
@@ -51,6 +51,8 @@ class ProgressEntryResponse(BaseModel):
         is_on_track: Whether meeting expected progress rate
         notes: User or system notes
         logged_at: When this entry was logged
+        ceiling_warning: Warning message when approaching bulking ceiling (bulking only)
+        rate_warning: Warning message when gaining too fast (bulking only)
     """
 
     id: UUID
@@ -64,6 +66,14 @@ class ProgressEntryResponse(BaseModel):
     is_on_track: bool
     notes: Optional[str] = None
     logged_at: datetime
+    ceiling_warning: Optional[str] = Field(
+        None,
+        description="Warning when approaching bulking ceiling (within 1%)"
+    )
+    rate_warning: Optional[str] = Field(
+        None,
+        description="Warning when body fat gain rate exceeds 0.5%/week"
+    )
 
     model_config = {
         "from_attributes": True,
@@ -89,9 +99,9 @@ class ProgressEntryResponse(BaseModel):
 
 class TrendsResponse(BaseModel):
     """Schema for progress trends analysis response.
-    
+
     Provides aggregated analysis of progress over time with recommendations.
-    
+
     Attributes:
         goal_id: Goal being analyzed
         progress_percentage: Percentage of goal completed (0-100)

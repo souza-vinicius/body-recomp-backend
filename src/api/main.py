@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
-from src.api.routers import users, measurements, goals, progress, auth
+from src.api.routers import users, measurements, goals, progress, auth, plans
 from src.core.config import settings
 from src.core.database import async_engine
 
@@ -153,3 +153,4 @@ app.include_router(
 )
 app.include_router(goals.router, prefix="/api/v1", tags=["goals"])
 app.include_router(progress.router, prefix="/api/v1", tags=["progress"])
+app.include_router(plans.router, prefix="/api/v1", tags=["plans"])

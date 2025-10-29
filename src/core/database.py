@@ -13,13 +13,16 @@ from sqlalchemy.orm import declarative_base
 
 from src.core.config import settings
 
-# Create async engine
+# Create async engine with production-grade connection pooling
 async_engine = create_async_engine(
     settings.DATABASE_URL,
     echo=settings.DEBUG,
-    pool_pre_ping=True,
-    pool_size=10,
-    max_overflow=20,
+    # Connection pool configuration for production
+    pool_size=20,  # Number of connections to maintain in the pool
+    max_overflow=10,  # Additional connections allowed under high load
+    pool_timeout=30,  # Seconds to wait for a connection from the pool
+    pool_pre_ping=True,  # Verify connection health before using
+    pool_recycle=3600,  # Recycle connections after 1 hour
 )
 
 # Create async session maker

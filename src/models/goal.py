@@ -24,6 +24,8 @@ from src.models.enums import GoalType, GoalStatus
 if TYPE_CHECKING:
     from src.models.user import User
     from src.models.measurement import BodyMeasurement
+    from src.models.plan import TrainingPlan, DietPlan
+    from src.models.progress import ProgressEntry
 
 
 class Goal(Base):
@@ -171,6 +173,20 @@ class Goal(Base):
         foreign_keys="[ProgressEntry.goal_id]",
         cascade="all, delete-orphan",
         order_by="ProgressEntry.week_number",
+    )
+
+    training_plan: Mapped[Optional["TrainingPlan"]] = relationship(
+        "TrainingPlan",
+        back_populates="goal",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+
+    diet_plan: Mapped[Optional["DietPlan"]] = relationship(
+        "DietPlan",
+        back_populates="goal",
+        uselist=False,
+        cascade="all, delete-orphan",
     )
 
     # Composite Indexes
