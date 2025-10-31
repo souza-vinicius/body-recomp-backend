@@ -381,7 +381,7 @@ This task breakdown organizes implementation into phases, with each user story t
   - **Constitution**: Principle III
   - **Exit Criteria**: All US2 acceptance scenarios validated
 
-- [ ] [T054] [P2] [US2] Manual verification with quickstart.md User Story 2 scenarios
+- [X] [T054] [P2] [US2] Manual verification with quickstart.md User Story 2 scenarios
   - **Reference**: quickstart.md lines 149-267
   - **Flow**: Log weekly progress 4 times → View trends → Verify goal completion
   - **Constitution**: Principle I
@@ -612,13 +612,13 @@ This task breakdown organizes implementation into phases, with each user story t
 
 ### Implementation
 
-- [ ] [T079] [P5] [US5] Create TrainingPlan and DietPlan SQLAlchemy models
+- [X] [T079] [P5] [US5] Create TrainingPlan and DietPlan SQLAlchemy models
   - **File**: `src/models/plan.py`
   - **Tables**: `training_plans`, `diet_plans` per data-model.md lines 216-274
   - **Constitution**: Principle II, data-model.md
   - **Details**: Foreign keys to goal_id, JSONB fields for recommendations, one-to-one relationship with goal
 
-- [ ] [T080] [P5] [US5] Create TrainingPlan and DietPlan Pydantic schemas
+- [X] [T080] [P5] [US5] Create TrainingPlan and DietPlan Pydantic schemas
   - **File**: `src/schemas/plan.py`
   - **Schemas**: `TrainingPlanResponse`, `DietPlanResponse`, `MacronutrientBreakdown`
   - **Constitution**: FR-014, FR-015
@@ -830,68 +830,68 @@ This task breakdown organizes implementation into phases, with each user story t
 
 ### Error Handling & Validation
 
-- [ ] [T106] [N/A] [N/A] Implement global exception handlers in main.py
+- [X] [T106] [N/A] [N/A] Implement global exception handlers in main.py
   - **File**: `src/api/main.py`
   - **Handlers**: `validation_exception_handler`, `not_found_exception_handler`, `generic_exception_handler`
   - **Constitution**: Principle I (consistent error structure), research.md error handling
   - **Details**: Return RFC 7807 problem details format
 
-- [ ] [T107] [N/A] [N/A] Add input validation for all measurement endpoints
+- [X] [T107] [N/A] [N/A] Add input validation for all measurement endpoints
   - **Files**: `src/schemas/measurement.py`, `src/services/validation_service.py`
   - **Constitution**: FR-016 (reasonable ranges), FR-022 (measurement guidance)
   - **Details**: Validate ranges, provide helpful error messages with measurement tips
 
-- [ ] [T108] [N/A] [N/A] Add edge case handling for unrealistic body fat calculations
+- [X] [T108] [N/A] [N/A] Add edge case handling for unrealistic body fat calculations
   - **File**: `src/services/body_fat_calculator.py`
   - **Constitution**: Edge cases from spec.md lines 99-106
   - **Details**: Return error if BF <5% or >50%, suggest re-measurement
 
-- [ ] [T109] [N/A] [N/A] Write tests for all error scenarios
+- [X] [T109] [N/A] [N/A] Write tests for all error scenarios
   - **File**: `tests/integration/test_error_handling.py`
   - **Test Cases**: Invalid inputs (422), not found (404), unauthorized (401), forbidden (403), server errors (500)
 
 ### Logging & Monitoring
 
-- [ ] [T110] [N/A] [N/A] Implement structured logging with Python logging
+- [X] [T110] [N/A] [N/A] Implement structured logging with Python logging
   - **File**: `src/core/logging.py`
   - **Constitution**: Principle IV (audit logging)
   - **Details**: Log all API requests, authentication events, data access, errors with user_id context
 
-- [ ] [T111] [N/A] [N/A] Add request/response logging middleware
+- [X] [T111] [N/A] [N/A] Add request/response logging middleware
   - **File**: `src/api/main.py`
   - **Middleware**: Log request method, path, status code, response time, user_id
   - **Constitution**: Principle IV (audit trail)
 
 ### Performance & Optimization
 
-- [ ] [T112] [N/A] [N/A] Add database indexes for query optimization
+- [X] [T112] [N/A] [N/A] Add database indexes for query optimization
   - **Files**: Migration files, models
   - **Indexes**: `users.email`, `goals.user_id`, `measurements.user_id + measured_at`, `progress_entries.goal_id + logged_at`
   - **Constitution**: Performance goals <200ms p95
 
-- [ ] [T113] [N/A] [N/A] Implement database connection pooling
+- [X] [T113] [N/A] [N/A] Implement database connection pooling
   - **File**: `src/core/database.py`
   - **Configuration**: Pool size, max overflow, pool timeout
   - **Constitution**: Support 1000 concurrent users
 
-- [ ] [T114] [N/A] [N/A] Add caching for expensive calculations (optional)
+- [X] [T114] [N/A] [N/A] Add caching for expensive calculations (optional)
   - **Files**: `src/services/body_fat_calculator.py`, `src/services/plan_generator.py`
   - **Details**: Cache BMR/TDEE calculations, consider Redis for production
 
 ### Deployment
 
-- [ ] [T115] [N/A] [N/A] Finalize docker-compose.yml for production
+- [X] [T115] [N/A] [N/A] Finalize docker-compose.yml for production
   - **File**: `docker-compose.yml`
   - **Services**: API container, PostgreSQL, optional Redis
   - **Constitution**: Principle V (simple deployment)
   - **Details**: Environment variables, volume mounts, health checks, restart policies
 
-- [ ] [T116] [N/A] [N/A] Create comprehensive README.md
+- [X] [T116] [N/A] [N/A] Create comprehensive README.md
   - **File**: `README.md`
   - **Sections**: Overview, features, installation, configuration, API docs link, running tests, deployment
   - **Constitution**: Documentation for maintainability
 
-- [ ] [T117] [N/A] [N/A] Create deployment scripts
+- [X] [T117] [N/A] [N/A] Create deployment scripts
   - **Files**: `scripts/deploy.sh`, `scripts/backup.sh`
   - **Details**: Automated deployment, database backups, environment setup
 
@@ -902,22 +902,22 @@ This task breakdown organizes implementation into phases, with each user story t
   - **Constitution**: Principle I (OpenAPI compliance), Principle III (contract tests)
   - **Details**: Automated API contract testing against OpenAPI spec
 
-- [ ] [T119] [N/A] [N/A] Run full integration test suite
+- [X] [T119] [N/A] [N/A] Run full integration test suite
   - **Command**: `pytest tests/integration/ -v --cov=src --cov-report=html`
   - **Constitution**: Principle III
   - **Exit Criteria**: All user stories end-to-end validated, >80% code coverage
 
-- [ ] [T120] [N/A] [N/A] Run full unit test suite
+- [X] [T120] [N/A] [N/A] Run full unit test suite
   - **Command**: `pytest tests/unit/ -v`
   - **Constitution**: Principle III
   - **Exit Criteria**: All business logic validated in isolation
 
-- [ ] [T121] [N/A] [N/A] Manual end-to-end testing with quickstart.md
+- [X] [T121] [N/A] [N/A] Manual end-to-end testing with quickstart.md
   - **Reference**: quickstart.md all user stories
   - **Flow**: Execute all curl examples, verify responses
   - **Constitution**: Principle I (API matches spec)
 
-- [ ] [T122] [N/A] [N/A] Performance testing under load
+- [X] [T122] [N/A] [N/A] Performance testing under load
   - **Tool**: Locust or k6
   - **Scenarios**: 100 concurrent users creating goals, logging progress
   - **Constitution**: <200ms p95 response time
@@ -925,12 +925,12 @@ This task breakdown organizes implementation into phases, with each user story t
 
 ### Documentation
 
-- [ ] [T123] [N/A] [N/A] Update OpenAPI spec with final examples and descriptions
+- [X] [T123] [N/A] [N/A] Update OpenAPI spec with final examples and descriptions
   - **File**: `specs/001-body-recomp-goals/contracts/openapi.yaml`
   - **Updates**: Complete all endpoint descriptions, add more examples
   - **Constitution**: Principle I (API-first)
 
-- [ ] [T124] [N/A] [N/A] Generate final API documentation
+- [X] [T124] [N/A] [N/A] Generate final API documentation
   - **Output**: Swagger UI available at /docs, ReDoc at /redoc
   - **Constitution**: Principle I
   - **Verify**: All endpoints documented, interactive examples work

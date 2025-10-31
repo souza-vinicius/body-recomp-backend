@@ -202,7 +202,7 @@ class BodyFatCalculator:
             ValueError: If method is invalid or required measurements are missing
         """
         if method == CalculationMethod.NAVY:
-            return cls.calculate_navy(
+            result = cls.calculate_navy(
                 gender=gender,
                 height_cm=height_cm,
                 waist_cm=measurements.get("waist_cm"),
@@ -210,7 +210,7 @@ class BodyFatCalculator:
                 hip_cm=measurements.get("hip_cm"),
             )
         elif method == CalculationMethod.THREE_SITE:
-            return cls.calculate_3_site(
+            result = cls.calculate_3_site(
                 gender=gender,
                 age=age,
                 chest_mm=measurements.get("chest_mm"),
@@ -220,7 +220,7 @@ class BodyFatCalculator:
                 suprailiac_mm=measurements.get("suprailiac_mm"),
             )
         elif method == CalculationMethod.SEVEN_SITE:
-            return cls.calculate_7_site(
+            result = cls.calculate_7_site(
                 gender=gender,
                 age=age,
                 chest_mm=measurements["chest_mm"],
@@ -233,3 +233,21 @@ class BodyFatCalculator:
             )
         else:
             raise ValueError(f"Invalid calculation method: {method}")
+
+        # Validate result is within realistic ranges
+        if result < Decimal("5.0"):
+            raise ValueError(
+                f"Body fat percentage of {result}% is unrealistically "
+                "low (<5%). Please verify measurements and consider "
+                "re-measuring. Essential body fat is typically 2-5% "
+                "for men and 10-13% for women."
+            )
+        elif result > Decimal("50.0"):
+            raise ValueError(
+                f"Body fat percentage of {result}% is unrealistically "
+                "high (>50%). Please verify measurements and consider "
+                "re-measuring. If accurate, consider consulting a "
+                "healthcare professional."
+            )
+
+        return result
