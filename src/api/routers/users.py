@@ -11,7 +11,7 @@ from src.core.security import get_password_hash
 from src.models.user import User
 from src.schemas.user import UserCreate, UserResponse
 
-router = APIRouter(prefix="/users", tags=["Users"])
+router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.post(

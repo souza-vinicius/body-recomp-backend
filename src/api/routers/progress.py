@@ -18,7 +18,7 @@ from src.schemas.progress import (
     TrendsResponse
 )
 
-router = APIRouter(prefix="/goals", tags=["Progress"])
+router = APIRouter(prefix="/goals", tags=["progress"])
 
 
 @router.post(

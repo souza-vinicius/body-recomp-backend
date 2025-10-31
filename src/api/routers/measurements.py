@@ -17,7 +17,7 @@ from src.schemas.measurement import (
 )
 from src.services.body_fat_calculator import BodyFatCalculator
 
-router = APIRouter(prefix="/measurements", tags=["Measurements"])
+router = APIRouter(prefix="/measurements", tags=["measurements"])
 
 
 @router.post(

@@ -248,11 +248,9 @@ async def root():
 
 
 # Mount API routers
-app.include_router(auth.router, prefix="/api/v1", tags=["authentication"])
-app.include_router(users.router, prefix="/api/v1", tags=["users"])
-app.include_router(
-    measurements.router, prefix="/api/v1", tags=["measurements"]
-)
-app.include_router(goals.router, prefix="/api/v1", tags=["goals"])
-app.include_router(progress.router, prefix="/api/v1", tags=["progress"])
-app.include_router(plans.router, prefix="/api/v1", tags=["plans"])
+app.include_router(auth.router, prefix="/api/v1")
+app.include_router(users.router, prefix="/api/v1")
+app.include_router(measurements.router, prefix="/api/v1")
+app.include_router(goals.router, prefix="/api/v1")
+app.include_router(progress.router, prefix="/api/v1")
+app.include_router(plans.router, prefix="/api/v1")

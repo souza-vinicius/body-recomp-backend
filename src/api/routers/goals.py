@@ -14,7 +14,7 @@ from src.models.goal import Goal
 from src.schemas.goal import GoalCreate, GoalResponse
 from src.services.goal_service import GoalService
 
-router = APIRouter(prefix="/goals", tags=["Goals"])
+router = APIRouter(prefix="/goals", tags=["goals"])
 goal_service = GoalService()
 
 
