@@ -1,0 +1,116 @@
+{
+  "name": "body-recomp-backend",
+  "services": [
+    {
+      "type": "app",
+      "data": {
+        "projectName": "body-recomp-backend",
+        "serviceName": "api",
+        "source": {
+          "type": "github",
+          "owner": "souza-vinicius",
+          "repo": "body-recomp-backend",
+          "branch": "main"
+        },
+        "build": {
+          "type": "dockerfile",
+          "dockerfile": "Dockerfile"
+        },
+        "deploy": {
+          "command": "/app/scripts/init.sh",
+          "replicas": 1,
+          "zeroDowntime": true
+        },
+        "domains": [
+          {
+            "host": "$(EASYPANEL_DOMAIN)",
+            "https": true
+          }
+        ],
+        "env": [
+          {
+            "key": "DATABASE_URL",
+            "value": "postgresql+asyncpg://$(PROJECT_NAME)_db_user:$(PROJECT_NAME)_db_password@$(PROJECT_NAME)_db:5432/$(PROJECT_NAME)_db"
+          },
+          {
+            "key": "SECRET_KEY",
+            "value": "$(SECRET_KEY)"
+          },
+          {
+            "key": "ACCESS_TOKEN_EXPIRE_MINUTES",
+            "value": "30"
+          },
+          {
+            "key": "REFRESH_TOKEN_EXPIRE_DAYS",
+            "value": "7"
+          },
+          {
+            "key": "DEBUG",
+            "value": "false"
+          },
+          {
+            "key": "ALLOWED_ORIGINS",
+            "value": "https://$(EASYPANEL_DOMAIN)"
+          }
+        ],
+        "mounts": [],
+        "ports": [
+          {
+            "published": 8000,
+            "target": 8000,
+            "protocol": "tcp"
+          }
+        ],
+        "healthcheck": {
+          "test": ["CMD", "curl", "-f", "http://localhost:8000/health"],
+          "interval": 30,
+          "timeout": 10,
+          "retries": 3,
+          "startPeriod": 40
+        },
+        "resources": {
+          "limits": {
+            "memory": "512M",
+            "cpus": "0.5"
+          },
+          "reservations": {
+            "memory": "256M",
+            "cpus": "0.25"
+          }
+        }
+      }
+    },
+    {
+      "type": "postgres",
+      "data": {
+        "projectName": "body-recomp-backend",
+        "serviceName": "db",
+        "password": "$(PROJECT_NAME)_db_password",
+        "image": "postgres:15-alpine",
+        "databases": [
+          {
+            "name": "$(PROJECT_NAME)_db",
+            "username": "$(PROJECT_NAME)_db_user"
+          }
+        ],
+        "mounts": [
+          {
+            "type": "volume",
+            "name": "db-data",
+            "mountPath": "/var/lib/postgresql/data"
+          }
+        ],
+        "resources": {
+          "limits": {
+            "memory": "1G",
+            "cpus": "0.5"
+          },
+          "reservations": {
+            "memory": "512M",
+            "cpus": "0.25"
+          }
+        }
+      }
+    }
+  ]
+}
