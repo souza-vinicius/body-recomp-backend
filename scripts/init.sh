@@ -41,7 +41,7 @@ echo "✅ PostgreSQL pronto!"
 
 # Executa migrações do Alembic
 echo "📦 Executando migrações..."
-cd /app/src
+cd /app
 alembic upgrade head
 
 echo "✅ Migrações concluídas!"
