@@ -1,7 +1,9 @@
-"""
-Core configuration settings for Body Recomp Backend.
+"""Core configuration settings for Body Recomp Backend.
 Uses pydantic-settings to load configuration from environment variables.
 """
+import json
+from typing import Union
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -28,6 +30,31 @@ class Settings(BaseSettings):
         "http://localhost:3000",
         "http://localhost:8000",
     ]
+
+    @field_validator("ALLOWED_ORIGINS", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v: Union[str, list[str]]) -> list[str]:
+        """Parse ALLOWED_ORIGINS from string or list.
+        
+        Accepts:
+        - Single string: "https://example.com"
+        - Comma-separated: "https://example.com,https://app.com"
+        - JSON array: '["https://example.com","https://app.com"]'
+        - List: ["https://example.com", "https://app.com"]
+        """
+        if isinstance(v, str):
+            # Try to parse as JSON array first
+            v = v.strip()
+            if v.startswith("[") and v.endswith("]"):
+                try:
+                    return json.loads(v)
+                except json.JSONDecodeError:
+                    pass
+            
+            # Parse as comma-separated string
+            return [origin.strip() for origin in v.split(",") if origin.strip()]
+        
+        return v
 
     model_config = SettingsConfigDict(
         env_file=".env",

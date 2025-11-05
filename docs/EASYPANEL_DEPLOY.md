@@ -59,6 +59,11 @@ DEBUG=false
 ALLOWED_ORIGINS=https://seu-dominio.easypanel.host
 ```
 
+**Nota**: `ALLOWED_ORIGINS` aceita três formatos:
+- String única: `ALLOWED_ORIGINS=https://seu-dominio.easypanel.host`
+- Múltiplas (vírgula): `ALLOWED_ORIGINS=https://app.com,https://www.app.com`
+- JSON array: `ALLOWED_ORIGINS=["https://app.com","https://www.app.com"]`
+
 #### Como gerar SECRET_KEY:
 
 ```bash
