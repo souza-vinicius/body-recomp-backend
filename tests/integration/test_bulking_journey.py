@@ -87,7 +87,7 @@ class TestBulkingGoalCreation:
 
         # Step 4: Create bulking goal with 18% ceiling
         goal_data = {
-            "goal_type": "bulking",
+            "goal_type": "BULKING",
             "initial_measurement_id": measurement["id"],
             "ceiling_body_fat_percentage": 18.0,
         }
@@ -101,8 +101,8 @@ class TestBulkingGoalCreation:
         goal = goal_response.json()
 
         # Verify goal was created correctly
-        assert goal["goal_type"] == "bulking"
-        assert goal["status"] == "active"
+        assert goal["goal_type"] == "BULKING"
+        assert goal["status"] == "ACTIVE"
         assert goal["ceiling_body_fat_percentage"] == 18.0
 
         # Verify caloric surplus
@@ -202,7 +202,7 @@ class TestBulkingGoalCreation:
 
         # Step 3: Create bulking goal with 18% ceiling
         goal_data = {
-            "goal_type": "bulking",
+            "goal_type": "BULKING",
             "initial_measurement_id": initial_measurement["id"],
             "ceiling_body_fat_percentage": 18.0,
         }
@@ -213,7 +213,7 @@ class TestBulkingGoalCreation:
         assert goal_response.status_code == 201
         goal = goal_response.json()
         goal_id = goal["id"]
-        assert goal["status"] == "active"
+        assert goal["status"] == "ACTIVE"
 
         # Step 4: Log progress for Week 1 (healthy gain)
         week1_measurement = {
@@ -329,7 +329,7 @@ class TestBulkingGoalCreation:
         assert goal_check_response.status_code == 200
         goal_check = goal_check_response.json()
         if week3_bf < 18.0:
-            assert goal_check["status"] == "active"
+            assert goal_check["status"] == "ACTIVE"
 
         # Step 7: Log progress for Week 4 (at/above ceiling)
         week4_measurement = {
@@ -375,7 +375,7 @@ class TestBulkingGoalCreation:
         final_goal = final_goal_response.json()
 
         if week4_bf >= 18.0:
-            assert final_goal["status"] == "completed"
+            assert final_goal["status"] == "COMPLETED"
             assert final_goal["completed_at"] is not None
 
         # Step 8: Verify progress history

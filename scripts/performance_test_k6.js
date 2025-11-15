@@ -90,12 +90,15 @@ export default function () {
   sleep(0.5);
   
   // Step 3: Create measurement
+  // Remove timezone info from ISO string to avoid timezone-aware vs timezone-naive datetime issues
+  const measuredAt = new Date().toISOString().replace('Z', '').replace(/\.\d{3}/, '');
+  
   let measurementRes = http.post(`${BASE_URL}/api/v1/measurements`, JSON.stringify({
     weight_kg: 80.0 + Math.random() * 20,
     calculation_method: 'navy',
     waist_cm: 85.0 + Math.random() * 15,
     neck_cm: 36.0 + Math.random() * 4,
-    measured_at: new Date().toISOString()
+    measured_at: measuredAt
   }), {
     headers: authHeaders,
     tags: { name: 'CreateMeasurement' },
@@ -147,12 +150,15 @@ export default function () {
   sleep(1);
   
   // Step 5: Log progress (simulate week 1)
+  // Remove timezone info from ISO string to avoid timezone-aware vs timezone-naive datetime issues
+  const progressMeasuredAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().replace('Z', '').replace(/\.\d{3}/, '');
+  
   let progressMeasurementRes = http.post(`${BASE_URL}/api/v1/measurements`, JSON.stringify({
     weight_kg: 79.0 + Math.random() * 20,
     calculation_method: 'navy',
     waist_cm: 84.0 + Math.random() * 15,
     neck_cm: 36.0 + Math.random() * 4,
-    measured_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+    measured_at: progressMeasuredAt
   }), {
     headers: authHeaders,
     tags: { name: 'CreateProgressMeasurement' },

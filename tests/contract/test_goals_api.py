@@ -26,7 +26,7 @@ class TestGoalCreation:
         """
         # Arrange
         goal_data = {
-            "goal_type": "cutting",
+            "goal_type": "CUTTING",
             "initial_measurement_id": test_measurement["id"],
             "target_body_fat_percentage": 12.0,
         }
@@ -63,9 +63,9 @@ class TestGoalCreation:
         assert "updated_at" in data
 
         # Validate goal values
-        assert data["goal_type"] == "cutting"
+        assert data["goal_type"] == "CUTTING"
         assert data["target_body_fat_percentage"] == 12.0
-        assert data["status"] == "active"
+        assert data["status"] == "ACTIVE"
         assert data["weeks_elapsed"] == 0
         assert data["progress_percentage"] == 0.0
 
@@ -81,7 +81,7 @@ class TestGoalCreation:
         """Test creating a bulking goal with caloric surplus."""
         # Arrange
         goal_data = {
-            "goal_type": "bulking",
+            "goal_type": "BULKING",
             "initial_measurement_id": test_measurement["id"],
             "ceiling_body_fat_percentage": 25.0,  # Higher than current 22.5%
         }
@@ -96,9 +96,9 @@ class TestGoalCreation:
         # Assert
         assert response.status_code == 201
         data = response.json()
-        assert data["goal_type"] == "bulking"
+        assert data["goal_type"] == "BULKING"
         assert data["ceiling_body_fat_percentage"] == 25.0
-        assert data["status"] == "active"
+        assert data["status"] == "ACTIVE"
 
         # Validate target_calories > 0 (should be surplus)
         assert data["target_calories"] > 0
@@ -115,7 +115,7 @@ class TestGoalCreation:
         """
         # Arrange - unsafe target for male
         goal_data = {
-            "goal_type": "cutting",
+            "goal_type": "CUTTING",
             "initial_measurement_id": test_measurement["id"],
             "target_body_fat_percentage": 6.0,  # Unsafe for men
         }
@@ -145,7 +145,7 @@ class TestGoalCreation:
         """
         # Arrange - no initial_measurement_id provided
         goal_data = {
-            "goal_type": "cutting",
+            "goal_type": "CUTTING",
             "target_body_fat_percentage": 12.0,
         }
 
@@ -173,7 +173,7 @@ class TestGoalCreation:
         """
         # Arrange - create first goal
         goal_data = {
-            "goal_type": "cutting",
+            "goal_type": "CUTTING",
             "initial_measurement_id": test_measurement["id"],
             "target_body_fat_percentage": 12.0,
         }
@@ -187,7 +187,7 @@ class TestGoalCreation:
 
         # Act - try to create second goal
         goal_data2 = {
-            "goal_type": "bulking",
+            "goal_type": "BULKING",
             "initial_measurement_id": test_measurement["id"],
             "ceiling_body_fat_percentage": 25.0,  # Higher than current 22.5%
         }
@@ -241,7 +241,7 @@ class TestGoalCreation:
 
         # Test 1: Ceiling too low (below current BF) should fail
         goal_data_low = {
-            "goal_type": "bulking",
+            "goal_type": "BULKING",
             "initial_measurement_id": measurement_id,
             "ceiling_body_fat_percentage": 10.0,  # Below current
         }
@@ -254,7 +254,7 @@ class TestGoalCreation:
 
         # Test 2: Ceiling too high (unsafe) should fail
         goal_data_high = {
-            "goal_type": "bulking",
+            "goal_type": "BULKING",
             "initial_measurement_id": measurement_id,
             "ceiling_body_fat_percentage": 35.0,  # Too high for male
         }
@@ -267,7 +267,7 @@ class TestGoalCreation:
 
         # Test 3: Valid ceiling should succeed
         goal_data_valid = {
-            "goal_type": "bulking",
+            "goal_type": "BULKING",
             "initial_measurement_id": measurement_id,
             "ceiling_body_fat_percentage": 18.0,  # Safe range
         }

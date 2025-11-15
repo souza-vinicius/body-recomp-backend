@@ -29,12 +29,12 @@ class ActivityLevel(str, Enum):
 
 class GoalType(str, Enum):
     """Type of body recomposition goal."""
-    CUTTING = "cutting"
-    BULKING = "bulking"
+    CUTTING = "CUTTING"
+    BULKING = "BULKING"
 
 
 class GoalStatus(str, Enum):
     """Status of a goal."""
-    ACTIVE = "active"
-    COMPLETED = "completed"
-    CANCELLED = "cancelled"
+    ACTIVE = "ACTIVE"
+    COMPLETED = "COMPLETED"
+    CANCELLED = "CANCELLED"

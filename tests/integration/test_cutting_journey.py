@@ -86,7 +86,7 @@ class TestCuttingGoalJourney:
 
         # Step 4: Create cutting goal
         goal_data = {
-            "goal_type": "cutting",
+            "goal_type": "CUTTING",
             "target_body_fat_percentage": 12.0,
             "weekly_goal": 0.5,
         }
@@ -102,10 +102,10 @@ class TestCuttingGoalJourney:
         goal = goal_response.json()
 
         # Validate goal data
-        assert goal["goal_type"] == "cutting"
+        assert goal["goal_type"] == "CUTTING"
         assert goal["target_body_fat_percentage"] == 12.0
         assert goal["current_body_fat_percentage"] == current_bf
-        assert goal["status"] == "active"
+        assert goal["status"] == "ACTIVE"
         assert goal["initial_measurement_id"] == measurement["id"]
 
         # Validate caloric recommendations
@@ -134,7 +134,7 @@ class TestCuttingGoalJourney:
 
         # Validate retrieved goal matches created goal
         assert retrieved_goal["id"] == goal_id
-        assert retrieved_goal["goal_type"] == "cutting"
+        assert retrieved_goal["goal_type"] == "CUTTING"
         assert retrieved_goal["target_body_fat_percentage"] == 12.0
         assert "estimated_end_date" in retrieved_goal
 
@@ -189,7 +189,7 @@ class TestCuttingGoalJourney:
 
         # Step 4: Create bulking goal
         goal_data = {
-            "goal_type": "bulking",
+            "goal_type": "BULKING",
             "target_body_fat_percentage": 22.0,
             "weekly_goal": 0.3,
         }
@@ -202,8 +202,8 @@ class TestCuttingGoalJourney:
         assert goal_response.status_code == 201
         goal = goal_response.json()
 
-        assert goal["goal_type"] == "bulking"
-        assert goal["status"] == "active"
+        assert goal["goal_type"] == "BULKING"
+        assert goal["status"] == "ACTIVE"
 
         # Validate caloric surplus
         cal_rec = goal["caloric_recommendations"]
@@ -250,7 +250,7 @@ class TestCuttingGoalJourney:
 
         # Create first goal
         goal_data = {
-            "goal_type": "cutting",
+            "goal_type": "CUTTING",
             "target_body_fat_percentage": 12.0,
             "weekly_goal": 0.5,
         }
@@ -259,7 +259,7 @@ class TestCuttingGoalJourney:
 
         # Attempt to create second goal
         goal_data2 = {
-            "goal_type": "bulking",
+            "goal_type": "BULKING",
             "target_body_fat_percentage": 15.0,
             "weekly_goal": 0.3,
         }
@@ -331,7 +331,7 @@ class TestCuttingGoalJourney:
 
         # Create cutting goal (target 12% body fat)
         goal_data = {
-            "goal_type": "cutting",
+            "goal_type": "CUTTING",
             "target_body_fat_percentage": 12.0,
             "weekly_goal": 0.5,
         }
@@ -564,7 +564,7 @@ class TestCuttingGoalJourney:
 
         # Step 3: Create cutting goal
         goal_data = {
-            "goal_type": "cutting",
+            "goal_type": "CUTTING",
             "initial_measurement_id": measurement["id"],
             "target_body_fat_percentage": 15.0
         }

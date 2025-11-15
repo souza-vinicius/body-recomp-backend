@@ -316,7 +316,7 @@ async def test_user_with_goal(
 
     # Create cutting goal
     goal_data = {
-        "goal_type": "cutting",
+        "goal_type": "CUTTING",
         "target_body_fat_percentage": 12.0,
         "activity_level": 3,
         "initial_measurement_id": measurement_id
@@ -475,9 +475,9 @@ class TestBulkingProgressContracts:
         assert measurement_response.status_code == 201
         initial_measurement = measurement_response.json()
 
-        # Step 3: Create bulking goal with 18% ceiling
+        # Step 4: Create bulking goal with 18% ceiling
         goal_data = {
-            "goal_type": "bulking",
+            "goal_type": "BULKING",
             "initial_measurement_id": initial_measurement["id"],
             "ceiling_body_fat_percentage": 18.0,
         }
@@ -607,7 +607,7 @@ class TestBulkingProgressContracts:
         assert goal_response.status_code == 201
         goal = goal_response.json()
         goal_id = goal["id"]
-        assert goal["status"] == "active"
+        assert goal["status"] == "ACTIVE"
 
         # Step 4: Create measurement at ceiling (18% BF)
         # Using measurements that result in ~18% BF
@@ -652,11 +652,11 @@ class TestBulkingProgressContracts:
 
         # If at or above ceiling, goal should be completed
         if ceiling_bf >= 18.0:
-            assert updated_goal["status"] == "completed"
+            assert updated_goal["status"] == "COMPLETED"
             assert updated_goal["completed_at"] is not None
             # Should have ceiling warning in progress entry
             assert "ceiling_warning" in progress
             assert progress["ceiling_warning"] is not None
         else:
             # If not yet at ceiling, should still be active
-            assert updated_goal["status"] == "active"
+            assert updated_goal["status"] == "ACTIVE"

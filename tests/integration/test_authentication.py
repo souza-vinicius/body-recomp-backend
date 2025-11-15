@@ -149,7 +149,7 @@ class TestAuthenticationIntegration:
             "/api/v1/goals",
             headers={"Authorization": f"Bearer {access_token}"},
             json={
-                "goal_type": "cutting",
+                "goal_type": "CUTTING",
                 "initial_measurement_id": measurement_id,
                 "target_body_fat_percentage": 15.0,
             },

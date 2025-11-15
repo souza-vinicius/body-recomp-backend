@@ -65,7 +65,7 @@ class TestTrainingPlanContracts:
 
         # Step 4: Create cutting goal
         goal_data = {
-            "goal_type": "cutting",
+            "goal_type": "CUTTING",
             "initial_measurement_id": measurement["id"],
             "target_body_fat_percentage": 15.0,
         }
@@ -161,7 +161,7 @@ class TestTrainingPlanContracts:
 
         # Step 4: Create bulking goal
         goal_data = {
-            "goal_type": "bulking",
+            "goal_type": "BULKING",
             "initial_measurement_id": measurement["id"],
             "ceiling_body_fat_percentage": 18.0,
         }
@@ -294,7 +294,7 @@ class TestDietPlanContracts:
 
         # Step 4: Create cutting goal
         goal_data = {
-            "goal_type": "cutting",
+            "goal_type": "CUTTING",
             "initial_measurement_id": measurement["id"],
             "target_body_fat_percentage": 15.0,
         }
