@@ -9,13 +9,46 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.database import get_db
 from src.core.deps import get_current_user
-from src.models.user import User
 from src.models.goal import Goal
+from src.models.user import User
 from src.schemas.goal import GoalCreate, GoalResponse
 from src.services.goal_service import GoalService
 
 router = APIRouter(prefix="/goals", tags=["goals"])
 goal_service = GoalService()
+
+
+@router.get(
+    "",
+    response_model=list[GoalResponse],
+    summary="List all user goals",
+    description=(
+        "Retrieve all goals (active, completed, abandoned) "
+        "for the authenticated user."
+    ),
+)
+async def list_goals(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> list[Goal]:
+    """
+    List all goals for the authenticated user.
+
+    Returns all goals regardless of status (active, completed, abandoned),
+    ordered by created_at descending (newest first).
+
+    Each goal includes:
+    - Goal details and timeline
+    - Current progress metrics
+    - Status tracking
+    """
+    result = await db.execute(
+        select(Goal)
+        .where(Goal.user_id == current_user.id)
+        .order_by(Goal.created_at.desc())
+    )
+    goals = result.scalars().all()
+    return goals
 
 
 @router.post(
@@ -35,24 +68,24 @@ async def create_goal(
 ) -> Goal:
     """
     Create a new body recomposition goal.
-    
+
     For **cutting goals**:
     - Provide `target_body_fat_percentage` (must be lower than initial)
     - System calculates caloric deficit (300-500 cal below TDEE)
     - Estimates timeline based on 0.5-1% BF loss per month
-    
+
     For **bulking goals**:
     - Provide `ceiling_body_fat_percentage` (must be higher than initial)
     - System calculates caloric surplus (200-300 cal above TDEE)
     - Estimates timeline based on 0.1-0.3% BF gain per month
-    
+
     **Validations**:
     - Only one active goal allowed per user (FR-018)
     - Initial measurement must exist and belong to user
     - Goal must meet safety limits (FR-017):
       - Cutting: target >= 8% (men) or >= 15% (women)
       - Bulking: ceiling <= 30%
-    
+
     Returns the created goal with calculated caloric targets and timeline.
     """
     try:
@@ -66,17 +99,17 @@ async def create_goal(
         return goal
     except ValueError as e:
         error_msg = str(e)
-        # Check if it's an active goal conflict (should be 403 per OpenAPI spec)
+        # Active goal conflict (should be 403 per OpenAPI spec)
         if "already has an active goal" in error_msg.lower():
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=error_msg,
-            )
+            ) from e
         # Other validation errors are 400
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=error_msg,
-        )
+        ) from e
 
 
 @router.get(
@@ -92,14 +125,14 @@ async def get_goal(
 ) -> Goal:
     """
     Get a goal by ID.
-    
+
     Returns goal details including:
     - Goal type (cutting/bulking)
     - Current status (active/completed/cancelled)
     - Initial measurements
     - Target calories
     - Timeline estimate
-    
+
     **Access control**:
     - Users can only access their own goals
     - Returns 404 if goal doesn't exist or belongs to another user
@@ -108,18 +141,18 @@ async def get_goal(
         select(Goal).where(Goal.id == goal_id)
     )
     goal = result.scalar_one_or_none()
-    
+
     if not goal:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Goal not found",
         )
-    
+
     # Ensure user can only access their own goals
     if goal.user_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Goal not found",
         )
-    
+
     return goal

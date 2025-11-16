@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+.expo/
+web-build/
+
+# Native folders
+ios/
+android/
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Cache
+.cache/
+*.tsbuildinfo
+
+# Logs
+*.log
+logs/
+
+# Generated files
+expo-env.d.ts
+
+# Config files
+*.config.js
+babel.config.js
+metro.config.js
+
+# Test files
+**/*.test.ts
+**/*.test.tsx
+**/__tests__/**
+**/__mocks__/**
