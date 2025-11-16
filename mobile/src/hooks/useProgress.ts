@@ -74,15 +74,16 @@ export const useProgressTrend = (
  */
 export const useProgressSummary = (
   goalId: string,
+  goal: any,
   enabled = true
 ): UseQueryResult<ProgressSummary, Error> => {
   return useQuery({
     queryKey: progressKeys.summary(goalId),
     queryFn: async () => {
-      const response = await getProgressSummary(goalId);
-      return response.data;
+      const response = await getProgressSummary(goalId, goal);
+      return response;
     },
-    enabled: enabled && !!goalId,
+    enabled: enabled && !!goalId && !!goal,
     staleTime: 1000 * 60, // 1 minute
   });
 };

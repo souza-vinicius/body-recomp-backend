@@ -36,6 +36,7 @@ import {
   Heading,
 } from '@gluestack-ui/themed';
 
+import { Card } from '../../src/components/common/Card';
 import { progressEntrySchema } from '../../src/services/validation/schemas';
 import { CreateProgressRequest } from '../../src/types/progress';
 import { useGoals } from '../../src/hooks/useGoals';
@@ -173,20 +174,36 @@ export default function ProgressScreen() {
   // Loading state
   if (goalsLoading) {
     return (
-      <Box style={styles.container} justifyContent="center" alignItems="center">
-        <ActivityIndicator size="large" color="#3B82F6" />
-        <Text style={styles.loadingText}>Loading progress...</Text>
-      </Box>
+      <ScrollView style={styles.container} contentContainerStyle={{ flexGrow: 1, padding: 24 }}>
+        <VStack flex={1} justifyContent="center" alignItems="center">
+          <Card title="Loading progress..." width="100%" maxWidth={480}>
+            <VStack space="md" alignItems="center">
+              <ActivityIndicator size="large" color="#3B82F6" />
+              <Text style={styles.loadingText}>Loading progress...</Text>
+            </VStack>
+          </Card>
+        </VStack>
+      </ScrollView>
     );
   }
 
   // No active goal state
   if (!activeGoal) {
     return (
-      <Box style={styles.container} justifyContent="center" alignItems="center" padding={24}>
-        <Text style={styles.emptyTitle}>No Active Goal</Text>
-        <Text style={styles.emptyText}>Create a goal first to start tracking your progress.</Text>
-      </Box>
+      <ScrollView style={styles.container} contentContainerStyle={{ flexGrow: 1, padding: 24 }}>
+        <VStack flex={1} justifyContent="center" alignItems="center">
+          <Card
+            title="No Active Goal"
+            subtitle="Create a goal first to start tracking your progress."
+            width="100%"
+            maxWidth={480}
+          >
+            <VStack space="md" alignItems="center">
+              <Text style={styles.emptyText}>Create a goal first to start tracking your progress.</Text>
+            </VStack>
+          </Card>
+        </VStack>
+      </ScrollView>
     );
   }
 
@@ -198,8 +215,7 @@ export default function ProgressScreen() {
       <Box padding={16}>
         {/* Progress Summary */}
         {progressSummary && (
-          <Box style={styles.summaryCard}>
-            <Text style={styles.sectionTitle}>Progress Summary</Text>
+          <Card title="Progress Summary" width="100%">
             <VStack gap={12} marginTop={12}>
               <HStack justifyContent="space-between">
                 <Text style={styles.summaryLabel}>Current</Text>
@@ -238,38 +254,34 @@ export default function ProgressScreen() {
                 </Text>
               </HStack>
             </VStack>
-          </Box>
+          </Card>
         )}
 
         {/* Progress Chart */}
         {progressTrend && progressTrend.chartData.dates.length > 0 && (
-          <Box style={styles.chartCard}>
-            <Text style={styles.sectionTitle}>Body Fat Trend</Text>
+          <Card title="Body Fat Trend" width="100%">
             <ProgressChart
               dates={progressTrend.chartData.dates}
               bodyFatPercentages={progressTrend.chartData.bodyFatPercentages}
               targetLine={progressTrend.chartData.targetLine}
               trendLine={progressTrend.chartData.trendLine}
             />
-          </Box>
+          </Card>
         )}
 
         {/* Weight & Body Fat Trend */}
         {progressTrend && progressTrend.chartData.dates.length > 0 && (
-          <Box style={styles.chartCard}>
-            <Text style={styles.sectionTitle}>Combined Trends</Text>
+          <Card title="Combined Trends" width="100%">
             <TrendChart
               dates={progressTrend.chartData.dates}
               weights={progressTrend.chartData.weights}
               bodyFatPercentages={progressTrend.chartData.bodyFatPercentages}
             />
-          </Box>
+          </Card>
         )}
 
         {/* Log Progress Form */}
-        <Box style={styles.formCard}>
-          <Text style={styles.sectionTitle}>Log Progress</Text>
-
+        <Card title="Log Progress" width="100%">
           {progressSummary && (
             <Text style={styles.nextEntryText}>
               {progressSummary.canLogProgress
@@ -380,12 +392,11 @@ export default function ProgressScreen() {
               )}
             </Button>
           </VStack>
-        </Box>
+        </Card>
 
         {/* Progress History */}
         {progressHistory && progressHistory.length > 0 && (
-          <Box marginTop={24}>
-            <Text style={styles.sectionTitle}>Progress History</Text>
+          <Card title="Progress History" width="100%" style={{ marginTop: 24 }}>
             <VStack gap={12} marginTop={12}>
               {progressHistory
                 .slice()
@@ -394,7 +405,7 @@ export default function ProgressScreen() {
                   <ProgressCard key={entry.id} entry={entry} />
                 ))}
             </VStack>
-          </Box>
+          </Card>
         )}
       </Box>
 
@@ -434,7 +445,7 @@ export default function ProgressScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#F1F5F9',
   },
   loadingText: {
     marginTop: 12,

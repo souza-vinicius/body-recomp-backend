@@ -44,17 +44,20 @@ export const Card: React.FC<CardProps> = ({
 
   return (
     <Box
+      // @ts-ignore
       p="$4"
       borderRadius="$lg"
       {...getCardStyles()}
       {...props}
     >
       {title && (
+        // @ts-ignore
         <Heading size="md" mb="$2">
           {title}
         </Heading>
       )}
       {subtitle && (
+        // @ts-ignore
         <Text size="sm" color="$gray600" mb="$3">
           {subtitle}
         </Text>

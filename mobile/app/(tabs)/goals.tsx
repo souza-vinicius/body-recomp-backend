@@ -23,6 +23,7 @@ import { GoalForm } from '../../src/components/goals/GoalForm';
 import { GoalCard } from '../../src/components/goals/GoalCard';
 import { LoadingSpinner } from '../../src/components/common/LoadingSpinner';
 import { ErrorMessage } from '../../src/components/common/ErrorMessage';
+import { Card } from '../../src/components/common/Card';
 
 export default function GoalsScreen() {
   const [goalType, setGoalType] = useState<GoalType>(GoalType.CUTTING);
@@ -171,15 +172,14 @@ export default function GoalsScreen() {
 
         {/* Show active goal if exists */}
         {activeGoal && (
-          <VStack space="md">
-            <Text fontSize="$lg" fontWeight="$semibold">
-              Active Goal
-            </Text>
-            <GoalCard goal={activeGoal} showProgress />
-            <Text fontSize="$sm" color="$textLight600" textAlign="center">
-              Complete or cancel your current goal before creating a new one.
-            </Text>
-          </VStack>
+          <Card title="Active Goal" width="100%">
+            <VStack space="md">
+              <GoalCard goal={activeGoal} showProgress />
+              <Text fontSize="$sm" color="$textLight600" textAlign="center">
+                Complete or cancel your current goal before creating a new one.
+              </Text>
+            </VStack>
+          </Card>
         )}
 
         {/* Show create goal form if no active goal */}
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
 
 // Inline lightweight selector component to avoid separate file complexity
 import { Pressable } from 'react-native';
-import { Card } from '../../src/components/common/Card';
+
 interface MeasurementSelectorProps {
   measurements: any[];
   selectedId: string;

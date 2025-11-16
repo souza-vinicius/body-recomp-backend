@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, VStack, HStack, Pressable } from '@gluestack-ui/themed';
-import { StyleSheet } from 'react-native';
 import { CalculationMethod } from '../../types/measurements';
 
 interface MethodSelectorProps {
@@ -41,10 +40,12 @@ export const MethodSelector: React.FC<MethodSelectorProps> = ({
   ];
 
   return (
+    // @ts-ignore
     <VStack space="md">
-      <Text fontSize="$md" fontWeight="$semibold">
+      <Text fontSize={16} fontWeight="$semibold">
         Calculation Method
       </Text>
+      {/* @ts-ignore */}
       <VStack space="sm">
         {methods.map((method) => (
           <Pressable
@@ -52,6 +53,7 @@ export const MethodSelector: React.FC<MethodSelectorProps> = ({
             onPress={() => onMethodChange(method.value)}
           >
             <HStack
+              // @ts-ignore
               p="$4"
               borderRadius="$lg"
               borderWidth={2}
@@ -60,9 +62,11 @@ export const MethodSelector: React.FC<MethodSelectorProps> = ({
               }
               bg={selectedMethod === method.value ? '$primary50' : '$white'}
               alignItems="center"
+              // @ts-ignore
               space="md"
             >
               <View
+                // @ts-ignore
                 h="$5"
                 w="$5"
                 borderRadius="$full"
@@ -76,6 +80,7 @@ export const MethodSelector: React.FC<MethodSelectorProps> = ({
               >
                 {selectedMethod === method.value && (
                   <View
+                    // @ts-ignore
                     h="$2"
                     w="$2"
                     borderRadius="$full"
@@ -83,11 +88,12 @@ export const MethodSelector: React.FC<MethodSelectorProps> = ({
                   />
                 )}
               </View>
+              {/* @ts-ignore */}
               <VStack flex={1} space="xxs">
-                <Text fontSize="$md" fontWeight="$medium">
+                <Text fontSize={16} fontWeight="$medium">
                   {method.label}
                 </Text>
-                <Text fontSize="$xs" color="$gray600">
+                <Text fontSize={12} color="$gray600">
                   {method.description}
                 </Text>
               </VStack>

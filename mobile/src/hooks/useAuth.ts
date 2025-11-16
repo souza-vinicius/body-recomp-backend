@@ -79,8 +79,9 @@ export const useAuth = () => {
   const userQuery = useQuery({
     queryKey: ['user'],
     queryFn: getCurrentUser,
-    enabled: false, // Only fetch when explicitly requested
+    enabled: true, // Fetch automatically when available
     staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 1, // Retry once on failure
   });
 
   // Check authentication status

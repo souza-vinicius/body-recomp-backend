@@ -4,234 +4,274 @@
  * latest metrics, and progress visualization
  */
 
-import React, { useState } from 'react';
-import {
-  ScrollView,
-  StyleSheet,
-  RefreshControl,
-  ActivityIndicator,
-  View,
-  Text,
-  TouchableOpacity,
-} from 'react-native';
+import React, { useCallback } from 'react';
+import { ScrollView, RefreshControl, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import {
+  Box,
+  Heading,
+  Text,
+  VStack,
+  HStack,
+  Progress,
+  ProgressFilledTrack,
+  Button,
+  ButtonText,
+  Spinner,
+} from '@gluestack-ui/themed';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { format } from 'date-fns';
 
 import { useGoals } from '../../src/hooks/useGoals';
+import { useMeasurements } from '../../src/hooks/useMeasurements';
+import { useProgressSummary } from '../../src/hooks/useProgress';
+
+import { Card } from '../../src/components/common/Card';
+import { useAuth } from '../../src/hooks/useAuth';
+
+// Helper to calculate BMI
+const calculateBMI = (weight: number, height: number) => {
+  if (!weight || !height) return 'N/A';
+  return (weight / (height * height)).toFixed(1);
+};
 
 export default function DashboardScreen() {
-  const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { user: currentUser } = useAuth();
 
-  // Get active goal and progress data
-  const { activeGoal, isLoading: goalsLoading, isError, error, refetchActiveGoal } = useGoals();
-  
-  // Debug logs
-  console.log('Dashboard - goalsLoading:', goalsLoading);
-  console.log('Dashboard - isError:', isError);
-  console.log('Dashboard - error:', error);
-  console.log('Dashboard - activeGoal:', activeGoal);
+  // Debug log
+  React.useEffect(() => {
+    console.log('[Dashboard] currentUser:', currentUser);
+    console.log('[Dashboard] latestMeasurement:', latestMeasurement);
+    console.log('[Dashboard] weight:', weight, 'bodyFat:', bodyFat);
+  }, [currentUser, latestMeasurement, weight, bodyFat]);
 
-  const onRefresh = async () => {
+  // --- Data Fetching ---
+  const {
+    activeGoal,
+    isLoading: goalsLoading,
+    isError: goalsError,
+    error: goalsErrorMessage,
+    refetchActiveGoal,
+  } = useGoals();
+
+  const {
+    latestMeasurement,
+    isLoading: measurementsLoading,
+    refetch: refetchMeasurements,
+  } = useMeasurements();
+
+  const {
+    data: progressSummary,
+    isLoading: summaryLoading,
+    refetch: refetchSummary,
+  } = useProgressSummary(activeGoal?.id ?? '', activeGoal, !!activeGoal);
+
+  // --- State and Callbacks ---
+  const isLoading = goalsLoading || measurementsLoading;
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await refetchActiveGoal();
+      await Promise.all([refetchActiveGoal(), refetchMeasurements(), refetchSummary()]);
     } catch (error) {
-      console.error('Error refreshing:', error);
+      console.error('Error refreshing dashboard:', error);
     }
     setRefreshing(false);
-  };
+  }, [refetchActiveGoal, refetchMeasurements, refetchSummary]);
 
-  // Calculate days remaining
-  const getDaysRemaining = () => {
-    if (!activeGoal?.endDate) return null;
-    const today = new Date();
-    const end = new Date(activeGoal.endDate);
-    const diffTime = end.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
+  // --- Render Logic ---
 
-  const daysRemaining = getDaysRemaining();
+  const renderLoading = () => (
+    <VStack flex={1} justifyContent="center" alignItems="center" bg="$backgroundLight50">
+      <Spinner size="large" />
+      <Text mt="$3" fontSize="$md" color="$textLight600">
+        Loading Dashboard...
+      </Text>
+    </VStack>
+  );
 
-  // Loading state
-  if (goalsLoading) {
-    return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator size="large" color="#3B82F6" />
-        <Text style={styles.loadingText}>Loading dashboard...</Text>
-      </View>
-    );
+  const renderError = () => (
+    <VStack flex={1} justifyContent="center" alignItems="center" bg="$backgroundLight50" p="$4">
+      <Icon name="alert-circle-outline" size={48} color="$error700" />
+      <Heading mt="$4" textAlign="center">
+        Unable to Load Dashboard
+      </Heading>
+      <Text mt="$2" textAlign="center" color="$textLight600">
+        {goalsErrorMessage instanceof Error
+          ? goalsErrorMessage.message
+          : 'An unexpected error occurred.'}
+      </Text>
+      <Button mt="$6" onPress={onRefresh}>
+        <ButtonText>Retry</ButtonText>
+      </Button>
+    </VStack>
+  );
+
+  const renderNoGoal = () => (
+    <ScrollView
+      style={{ flex: 1, backgroundColor: '#F1F5F9' }}
+      contentContainerStyle={{ flexGrow: 1, padding: 24 }}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+    >
+      <VStack flex={1} justifyContent="center" alignItems="center">
+        <Card
+          title="Welcome to Body Recomp!"
+          subtitle="Set a goal to start your transformation journey. Track your progress and stay motivated."
+          width="100%"
+          maxWidth={480}
+        >
+          <VStack space="lg" alignItems="center">
+            <Icon name="flag-outline" size={64} color="$primary500" />
+            <VStack space="md" w="$full">
+              <Button size="lg" onPress={() => router.push('/(tabs)/goals')}>
+                <ButtonText>Create Your First Goal</ButtonText>
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                onPress={() => router.push('/(tabs)/measurements')}
+              >
+                <ButtonText>Record Measurements</ButtonText>
+              </Button>
+            </VStack>
+          </VStack>
+        </Card>
+      </VStack>
+    </ScrollView>
+  );
+
+  if (isLoading && !refreshing) {
+    return renderLoading();
   }
 
-  // Error state
-  if (isError) {
-    return (
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={[styles.scrollContent, { padding: 16 }]}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      >
-        <View style={[styles.emptyContainer, { marginTop: 20 }]}>
-          <Text style={styles.emptyTitle}>Unable to load dashboard</Text>
-          <Text style={styles.emptySubtitle}>
-            {error instanceof Error ? error.message : 'An error occurred'}
-          </Text>
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => refetchActiveGoal()}
-          >
-            <Text style={styles.actionButtonText}>Retry</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    );
+  if (goalsError) {
+    return renderError();
   }
 
-  // No active goal state
   if (!activeGoal) {
-    return (
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      >
-        <View style={styles.emptyContainer}>
-          <View style={styles.emptyHeader}>
-            <Text style={styles.emptyTitle}>Welcome to Body Recomp!</Text>
-            <Text style={styles.emptySubtitle}>
-              Start your transformation journey
-            </Text>
-          </View>
-
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyCardTitle}>Get Started</Text>
-            <Text style={styles.emptyCardText}>
-              To begin tracking your progress, you'll need to:
-            </Text>
-            
-            <View style={styles.stepsContainer}>
-              <View style={styles.stepRow}>
-                <Text style={styles.stepNumber}>1</Text>
-                <Text style={styles.stepText}>
-                  Complete your initial body measurements
-                </Text>
-              </View>
-              <View style={styles.stepRow}>
-                <Text style={styles.stepNumber}>2</Text>
-                <Text style={styles.stepText}>
-                  Create your first goal (cutting or bulking)
-                </Text>
-              </View>
-              <View style={styles.stepRow}>
-                <Text style={styles.stepNumber}>3</Text>
-                <Text style={styles.stepText}>
-                  Log progress weekly to track your journey
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.actionsContainer}>
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => router.push('/measurements')}
-            >
-              <Text style={styles.actionButtonText}>Record Measurements</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.actionButtonOutline}
-              onPress={() => router.push('/goals')}
-            >
-              <Text style={styles.actionButtonOutlineText}>Create Goal</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
-    );
+    return renderNoGoal();
   }
 
-  // Main dashboard with active goal
+  // --- Main Dashboard View ---
+  const weight = latestMeasurement?.weight ?? 0;
+  const bodyFat = latestMeasurement?.bodyFat ?? 0;
+  
+  // Calculate target weight based on target body fat, accounting for 10% muscle loss
+  const leanMass = weight * (1 - bodyFat / 100);
+  
+  // Initial calculation assuming no muscle loss
+  const targetWeightInitial = leanMass / (1 - activeGoal.targetBodyFat / 100);
+  const kgToLoseInitial = Math.max(0, weight - targetWeightInitial);
+  
+  // Adjust for 10% muscle loss from total weight loss
+  const muscleLoss = 0.1 * kgToLoseInitial;
+  const finalLeanMass = leanMass - muscleLoss;
+  
+  // Recalculate target weight with adjusted lean mass
+  const targetWeight = finalLeanMass / (1 - activeGoal.targetBodyFat / 100);
+  const kgToLose = Math.max(0, weight - targetWeight);
+  const goalProgress = progressSummary?.progressPercentage ?? 0;
+  const goalTypeLabel = activeGoal.type === 'CUTTING' ? 'Cutting' : 'Bulking';
+  const weekNumber = progressSummary?.weeksElapsed ?? 1;
+  const totalWeeks = progressSummary?.totalWeeks ?? 16;
+
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top }]}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      {/* Header */}
-      <View style={styles.headerSection}>
-        <Text style={styles.header}>Dashboard</Text>
-        <Text style={styles.subheader}>Track your transformation</Text>
-      </View>
+      {/* Header com gradiente azul */}
+      <Box style={styles.header}>
+        {/* @ts-ignore */}
+        <VStack space="xs">
+          <Heading style={styles.greeting}>Olá, {currentUser.full_name ? currentUser.full_name : 'atleta'}! 👋</Heading>
+          <Text style={styles.subtitle}>
+            Semana {weekNumber} de {totalWeeks} do seu programa
+          </Text>
+        </VStack>
+      </Box>
 
-      {/* Active Goal Card */}
-      <View style={styles.card}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.cardTitle}>Current Goal</Text>
-          <View style={[
-            styles.badge,
-            activeGoal.type === 'CUTTING' ? styles.badgeCutting : styles.badgeBulking
-          ]}>
-            <Text style={styles.badgeText}>
-              {activeGoal.type === 'CUTTING' ? 'Cutting' : 'Bulking'}
+      {/* Cards de estatísticas principais */}
+      <HStack style={styles.statsRow}>
+        <Box style={styles.statCard}>
+          <Text style={styles.statEmoji}>💪</Text>
+          <Text style={styles.statValue}>{weight.toFixed(1)}kg</Text>
+          <Text style={styles.statLabel}>Peso</Text>
+        </Box>
+
+        <Box style={styles.statCard}>
+          <Text style={styles.statEmoji}>🎯</Text>
+          <Text style={[styles.statValue, { color: '#F97316' }]}>{bodyFat.toFixed(1)}%</Text>
+          <Text style={styles.statLabel}>Gordura</Text>
+        </Box>
+
+        <Box style={styles.statCard}>
+          <Text style={styles.statEmoji}>🔥</Text>
+          <Text style={[styles.statValue, { color: '#EF4444' }]}>
+            {activeGoal.recommendedCalories || 1900}
+          </Text>
+          <Text style={styles.statLabel}>Kcal/dia</Text>
+        </Box>
+      </HStack>
+
+      {/* Progresso até a meta */}
+      <Box style={styles.progressCard}>
+        <HStack style={styles.progressHeader}>
+          <Heading style={styles.progressTitle}>Progresso até a meta</Heading>
+          <Text style={styles.progressPercentage}>{goalProgress.toFixed(0)}%</Text>
+        </HStack>
+
+        <Progress value={goalProgress} style={styles.progressBar}>
+          <ProgressFilledTrack />
+        </Progress>
+
+        <HStack style={styles.progressFooter}>
+          <Text style={styles.progressDetail}>
+            {bodyFat.toFixed(1)}% → {activeGoal.targetBodyFat}%
+          </Text>
+          <Text style={styles.progressDetail}>
+            aproximadamente {kgToLose.toFixed(1)}kg para perder
+          </Text>
+        </HStack>
+      </Box>
+
+      {/* Treino de Hoje */}
+      {/* @ts-ignore */}
+      <VStack space="md" mt="$4">
+        {/* @ts-ignore */}
+        <Heading size="xl">Treino de Hoje</Heading>
+
+        <Box style={styles.workoutCard}>
+          {/* @ts-ignore */}
+          <VStack space="sm">
+            <Text style={styles.workoutDay}>
+              {format(new Date(), 'EEEE')}
             </Text>
-          </View>
-        </View>
+            <Heading style={styles.workoutTitle}>Upper Body A</Heading>
+          </VStack>
+          <Text style={styles.workoutIcon}>💪</Text>
+        </Box>
 
-        {/* Goal Details */}
-        <View style={styles.detailsContainer}>
-          <View style={styles.detailRow}>
-            <Text style={styles.label}>Current Body Fat</Text>
-            <Text style={styles.value}>
-              {activeGoal.currentBodyFat.toFixed(1)}%
-            </Text>
-          </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.label}>
-              {activeGoal.type === 'BULKING' ? 'Body Fat Ceiling' : 'Target Body Fat'}
-            </Text>
-            <Text style={styles.value}>{activeGoal.targetBodyFat.toFixed(1)}%</Text>
-          </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.label}>Target Calories</Text>
-            <Text style={styles.value}>{activeGoal.recommendedCalories} kcal</Text>
-          </View>
-        </View>
+        <Box style={styles.workoutDetails}>
+          {/* @ts-ignore */}
+          <HStack justifyContent="space-between" mb="$3">
+            <Text style={styles.detailLabel}>Duração estimada</Text>
+            <Text style={styles.detailValue}>45 minutos</Text>
+          </HStack>
+          <HStack justifyContent="space-between">
+            <Text style={styles.detailLabel}>Exercícios</Text>
+            <Text style={styles.detailValue}>5 exercícios</Text>
+          </HStack>
 
-        {/* Timeline */}
-        {daysRemaining !== null && (
-          <View style={styles.timelineBox}>
-            <View style={styles.timelineItem}>
-              <Text style={styles.timelineLabel}>Days Remaining</Text>
-              <Text style={styles.timelineValue}>{daysRemaining} days</Text>
-            </View>
-            <View style={styles.timelineItem}>
-              <Text style={styles.timelineLabel}>Target Date</Text>
-              <Text style={styles.timelineValue}>
-                {new Date(activeGoal.endDate).toLocaleDateString()}
-              </Text>
-            </View>
-          </View>
-        )}
-      </View>
-
-      {/* Quick Actions */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Quick Actions</Text>
-        <View style={styles.quickActionsContainer}>
-          <TouchableOpacity
-            style={styles.quickActionButton}
-            onPress={() => router.push('/progress')}
-          >
-            <Text style={styles.quickActionButtonText}>Log Progress</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.quickActionButton}
-            onPress={() => router.push('/goals')}
-          >
-            <Text style={styles.quickActionButtonText}>View Goals</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+          <Button style={styles.startButton} onPress={() => router.push('/(tabs)/measurements')}>
+            <ButtonText style={styles.startButtonText}>Iniciar Treino →</ButtonText>
+          </Button>
+        </Box>
+      </VStack>
     </ScrollView>
   );
 }
@@ -239,211 +279,164 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 14,
-    color: '#6B7280',
+    backgroundColor: '#F8FAFC',
   },
   content: {
-    padding: 16,
-    gap: 16,
-  },
-  headerSection: {
-    gap: 4,
+    paddingHorizontal: 12,
+    paddingBottom: 16,
   },
   header: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  subheader: {
-    fontSize: 14,
-    color: '#6B7280',
-  },
-  emptyContainer: {
+    backgroundColor: '#2563EB',
+    borderRadius: 16,
     padding: 16,
-    gap: 24,
-    marginTop: 40,
+    marginBottom: 12,
+    marginTop: 4,
   },
-  emptyHeader: {
+  greeting: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  subtitle: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginTop: 2,
+  },
+  statsRow: {
+    gap: 8,
+    marginBottom: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 1,
+    minHeight: 120,
+  },
+  statEmoji: {
+    fontSize: 32,
+    marginBottom: 6,
+  },
+  statValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2563EB',
+    marginBottom: 2,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#64748B',
+  },
+  progressCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+    gap: 12,
+    marginBottom: 12,
+  },
+  progressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     gap: 8,
   },
-  emptyTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#111827',
-    textAlign: 'center',
-  },
-  emptySubtitle: {
+  progressTitle: {
     fontSize: 16,
-    color: '#6B7280',
-    textAlign: 'center',
-  },
-  emptyCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-    gap: 16,
-  },
-  emptyCardTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  emptyCardText: {
-    fontSize: 14,
-    color: '#6B7280',
-    lineHeight: 20,
-  },
-  stepsContainer: {
-    gap: 12,
-  },
-  stepRow: {
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'flex-start',
-  },
-  stepNumber: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#3B82F6',
-    width: 24,
-  },
-  stepText: {
-    fontSize: 14,
-    color: '#374151',
+    fontWeight: '600',
+    color: '#0F172A',
     flex: 1,
-    lineHeight: 20,
   },
-  actionsContainer: {
-    gap: 12,
+  progressPercentage: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#2563EB',
   },
-  actionButton: {
-    backgroundColor: '#3B82F6',
-    borderRadius: 8,
-    padding: 16,
+  progressBar: {
+    height: 6,
+    backgroundColor: '#E2E8F0',
+    borderRadius: 3,
+  },
+  progressFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 8,
   },
-  actionButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
+  progressDetail: {
+    fontSize: 12,
+    color: '#64748B',
+    flex: 1,
   },
-  actionButtonOutline: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: '#3B82F6',
-    borderRadius: 8,
+  workoutCard: {
+    backgroundColor: '#10B981',
+    borderRadius: 16,
     padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
+    marginBottom: 8,
   },
-  actionButtonOutlineText: {
-    color: '#3B82F6',
-    fontSize: 16,
-    fontWeight: '600',
+  workoutDay: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.9)',
+    textTransform: 'capitalize',
   },
-  card: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
+  workoutTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  workoutIcon: {
+    fontSize: 40,
+  },
+  workoutDetails: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
     padding: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-    gap: 16,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  detailLabel: {
+    fontSize: 13,
+    color: '#64748B',
   },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#111827',
+  detailValue: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#0F172A',
   },
-  badge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+  startButton: {
+    backgroundColor: '#2563EB',
     borderRadius: 12,
+    marginTop: 12,
+    paddingVertical: 12,
   },
-  badgeCutting: {
-    backgroundColor: '#DBEAFE',
-  },
-  badgeBulking: {
-    backgroundColor: '#FEF3C7',
-  },
-  badge_CUTTING: {
-    backgroundColor: '#DBEAFE',
-  },
-  badge_BULKING: {
-    backgroundColor: '#FEF3C7',
-  },
-  badgeText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#1F2937',
-  },
-  detailsContainer: {
-    gap: 12,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  label: {
-    fontSize: 14,
-    color: '#6B7280',
-  },
-  value: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  timelineBox: {
-    backgroundColor: '#F9FAFB',
-    borderRadius: 8,
-    padding: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  timelineItem: {
-    gap: 4,
-  },
-  timelineLabel: {
-    fontSize: 12,
-    color: '#6B7280',
-  },
-  timelineValue: {
+  startButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#111827',
-  },
-  quickActionsContainer: {
-    gap: 12,
-  },
-  quickActionButton: {
-    backgroundColor: '#3B82F6',
-    borderRadius: 8,
-    padding: 14,
-    alignItems: 'center',
-  },
-  quickActionButtonText: {
-    color: '#ffffff',
-    fontSize: 15,
-    fontWeight: '600',
+    color: '#FFFFFF',
   },
 });

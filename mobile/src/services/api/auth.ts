@@ -61,5 +61,12 @@ export const refreshToken = async (
 export const getCurrentUser = async () => {
   // Spec: GET /api/v1/users/me
   const response = await apiClient.get('/users/me');
-  return response.data.data;
+  const userData = response.data?.data ?? response.data;
+  
+  // Ensure we always return valid data, never undefined
+  if (!userData || !userData.id) {
+    throw new Error('Invalid user data received from server');
+  }
+  
+  return userData;
 };

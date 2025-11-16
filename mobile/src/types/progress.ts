@@ -72,9 +72,12 @@ export interface ProgressSummary {
   currentBodyFat: number;
   targetBodyFat: number;
   startingBodyFat: number;
+  startingWeight: number;
+  currentWeight: number;
   progressPercentage: number; // 0-100
   weeksElapsed: number;
   weeksRemaining: number;
+  totalWeeks: number;
   lastEntryDate: string;
   nextEntryDue: string; // 7 days after lastEntryDate
   canLogProgress: boolean; // True if 7+ days since last entry

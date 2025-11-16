@@ -3,7 +3,6 @@ import {
   Input as GluestackInput,
   InputField,
   InputSlot,
-  InputIcon,
 } from '@gluestack-ui/themed';
 import { TextInputProps } from 'react-native';
 
@@ -36,6 +35,7 @@ export const Input: React.FC<InputProps> = ({
   ...props
 }) => {
   return (
+    // @ts-ignore
     <GluestackInput
       variant={variant}
       size={size}
@@ -43,14 +43,17 @@ export const Input: React.FC<InputProps> = ({
       isInvalid={isInvalid}
       isReadOnly={isReadOnly}
     >
+      {/* @ts-ignore */}
       {leftIcon && <InputSlot pl="$3">{leftIcon}</InputSlot>}
       <InputField
         placeholder={placeholder}
         value={value}
         onChangeText={onChangeText}
+        // @ts-ignore
         type={type}
         {...props}
       />
+      {/* @ts-ignore */}
       {rightIcon && <InputSlot pr="$3">{rightIcon}</InputSlot>}
     </GluestackInput>
   );
