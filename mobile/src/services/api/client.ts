@@ -20,6 +20,15 @@ let failedQueue: Array<{
   reject: (error: Error) => void;
 }> = [];
 
+// When refresh fails because user has logged out (no refresh token), set this
+let isLoggedOut = false;
+
+// Reset logged out flag (call this when user successfully logs in)
+export const resetAuthState = () => {
+  isLoggedOut = false;
+  tokenExpiration = null;
+};
+
 // Track token expiration
 let tokenExpiration: Date | null = null;
 
@@ -46,7 +55,9 @@ const isTokenExpired = (): boolean => {
 const refreshAccessToken = async (): Promise<string> => {
   const tokens = await getTokens();
   if (!tokens?.refreshToken) {
-    throw new Error('No refresh token available');
+    // Mark as logged out so we don't repeatedly attempt refresh
+    isLoggedOut = true;
+    throw new Error('User logged out');
   }
 
   const refreshResponse = await refreshTokenAPI(tokens.refreshToken);
@@ -60,16 +71,34 @@ apiClient.interceptors.request.use(
   async (requestConfig) => {
     try {
       console.log('[apiClient] Request to:', requestConfig.url);
+
+      // Skip auth checks for public endpoints (login, register, refresh)
+      const publicEndpoints = ['/auth/login', '/auth/register', '/auth/refresh', '/users'];
+      const isPublicEndpoint = publicEndpoints.some(endpoint => requestConfig.url?.includes(endpoint));
       
-      // Skip token logic for refresh endpoint to avoid infinite loop
-      if (requestConfig.url?.includes('/auth/refresh')) {
-        console.log('[apiClient] Skipping token logic for refresh endpoint');
+      if (isPublicEndpoint) {
+        console.log('[apiClient] Public endpoint, skipping auth checks');
         return requestConfig;
       }
 
+      // Check for tokens BEFORE checking isLoggedOut flag
+      // This handles the race condition where user just logged in
       const tokens = await getTokens();
       console.log('[apiClient] Tokens available:', !!tokens);
-      
+
+      // If we have valid tokens, clear the logged-out flag
+      // (user has successfully logged in, even if flag was previously set)
+      if (tokens?.accessToken && isLoggedOut) {
+        console.log('[apiClient] Tokens found after login, clearing logged-out flag');
+        isLoggedOut = false;
+      }
+
+      // NOW check if user is logged out (after clearing flag if tokens exist)
+      if (isLoggedOut) {
+        console.log('[apiClient] Aborting request: user logged out');
+        return Promise.reject(new Error('User logged out'));
+      }
+
       if (!tokens?.accessToken) {
         console.log('[apiClient] No access token available');
         return requestConfig;
@@ -111,6 +140,23 @@ apiClient.interceptors.response.use(
   async (error: AxiosError<ApiError>) => {
     const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
 
+    // Special-case: our request interceptor may abort with a synthetic
+    // "User logged out" error when there are no tokens. Treat this as a
+    // clean auth error instead of a misleading network error.
+    if (error.message === 'User logged out') {
+      const apiError: ApiError = {
+        message: 'User is logged out',
+        statusCode: 401,
+        errors: undefined,
+      };
+
+      if (typeof __DEV__ !== 'undefined' && __DEV__) {
+        console.log('[apiClient] Auth error (logged out):', apiError);
+      }
+
+      return Promise.reject(apiError);
+    }
+
     // Handle 401 Unauthorized - attempt token refresh
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
@@ -141,11 +187,18 @@ apiClient.interceptors.response.use(
         isRefreshing = false;
         return apiClient(originalRequest);
       } catch (refreshError) {
+        // If refresh failed because user is logged out, the error message
+        // is now 'User logged out' and isLoggedOut is already set in refreshAccessToken.
         processQueue(refreshError as Error, null);
         isRefreshing = false;
-        
+
         // Refresh failed - clear tokens and reject
-        await clearTokens();
+        try {
+          await clearTokens();
+        } catch (e) {
+          console.warn('[apiClient] clearTokens failed', e);
+        }
+
         return Promise.reject(refreshError);
       }
     }
@@ -155,7 +208,7 @@ apiClient.interceptors.response.use(
     const apiError: ApiError = {
       message:
         (error.response?.data as any)?.message ||
-        (isNetworkError ? 'Network error: unable to reach server' : error.message) ||
+        (isNetworkError ? `Network error: unable to reach server ${config.API_BASE_URL}` : error.message) ||
         'An unexpected error occurred',
       statusCode: error.response?.status || (isNetworkError ? 0 : 500),
       errors: (error.response?.data as any)?.errors,

@@ -12,6 +12,7 @@ import {
   Heading,
   Text,
   VStack,
+  Icon,
   HStack,
   Progress,
   ProgressFilledTrack,
@@ -38,14 +39,37 @@ const calculateBMI = (weight: number, height: number) => {
 export default function DashboardScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, isLoadingUser, checkAuth, refetchUser } = useAuth();
+  const [authChecked, setAuthChecked] = React.useState(false);
 
-  // Debug log
+
+
+  // Ensure user is authenticated; redirect to login if not
   React.useEffect(() => {
-    console.log('[Dashboard] currentUser:', currentUser);
-    console.log('[Dashboard] latestMeasurement:', latestMeasurement);
-    console.log('[Dashboard] weight:', weight, 'bodyFat:', bodyFat);
-  }, [currentUser, latestMeasurement, weight, bodyFat]);
+    let mounted = true;
+    const ensureAuth = async () => {
+      if (isLoadingUser) return;
+      if (!currentUser) {
+        const authed = await checkAuth();
+        if (!authed) {
+          router.replace('/(auth)/login');
+          setAuthChecked(true);
+          return;
+        }
+        // If tokens exist but user data missing, try refetching
+        try {
+          await refetchUser();
+        } catch (e) {
+          console.warn('Refetch user failed', e);
+        }
+      }
+      setAuthChecked(true);
+    };
+    if (mounted) ensureAuth();
+    return () => {
+      mounted = false;
+    };
+  }, [isLoadingUser, currentUser, checkAuth, refetchUser, router]);
 
   // --- Data Fetching ---
   const {
@@ -67,6 +91,17 @@ export default function DashboardScreen() {
     isLoading: summaryLoading,
     refetch: refetchSummary,
   } = useProgressSummary(activeGoal?.id ?? '', activeGoal, !!activeGoal);
+
+  // Basic derived values (safe to compute early so hooks order remains stable)
+  const weight = latestMeasurement?.weight ?? 0;
+  const bodyFat = latestMeasurement?.bodyFat ?? 0;
+
+  // Debug log (after values exist) — placed before early returns so hooks order is stable
+  React.useEffect(() => {
+    console.log('[Dashboard] currentUser:', currentUser);
+    console.log('[Dashboard] latestMeasurement:', latestMeasurement);
+    console.log('[Dashboard] weight:', weight, 'bodyFat:', bodyFat);
+  }, [currentUser, latestMeasurement, weight, bodyFat]);
 
   // --- State and Callbacks ---
   const isLoading = goalsLoading || measurementsLoading;
@@ -147,6 +182,10 @@ export default function DashboardScreen() {
     return renderLoading();
   }
 
+  if (!authChecked) {
+    return renderLoading();
+  }
+
   if (goalsError) {
     return renderError();
   }
@@ -156,9 +195,6 @@ export default function DashboardScreen() {
   }
 
   // --- Main Dashboard View ---
-  const weight = latestMeasurement?.weight ?? 0;
-  const bodyFat = latestMeasurement?.bodyFat ?? 0;
-  
   // Calculate target weight based on target body fat, accounting for 10% muscle loss
   const leanMass = weight * (1 - bodyFat / 100);
   
@@ -188,7 +224,7 @@ export default function DashboardScreen() {
       <Box style={styles.header}>
         {/* @ts-ignore */}
         <VStack space="xs">
-          <Heading style={styles.greeting}>Olá, {currentUser.full_name ? currentUser.full_name : 'atleta'}! 👋</Heading>
+          <Heading style={styles.greeting}>Olá, {currentUser?.full_name ? currentUser.full_name : 'atleta'}! 👋</Heading>
           <Text style={styles.subtitle}>
             Semana {weekNumber} de {totalWeeks} do seu programa
           </Text>

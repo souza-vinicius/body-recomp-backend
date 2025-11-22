@@ -7,6 +7,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   setUser: (user: User | null) => void;
+  recheckAuth: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -16,28 +17,34 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  const checkAuthStatus = async () => {
+    try {
+      const authenticated = await hasTokens();
+      setIsAuthenticated(authenticated);
+    } catch (error) {
+      console.error('Error checking auth status:', error);
+      setIsAuthenticated(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     // Check if user is authenticated on mount
-    const checkAuthStatus = async () => {
-      try {
-        const authenticated = await hasTokens();
-        setIsAuthenticated(authenticated);
-      } catch (error) {
-        console.error('Error checking auth status:', error);
-        setIsAuthenticated(false);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     checkAuthStatus();
   }, []);
+
+  const recheckAuth = async () => {
+    console.log('[AuthContext] Rechecking auth status...');
+    await checkAuthStatus();
+  };
 
   const value = {
     user,
     isAuthenticated,
     isLoading,
     setUser,
+    recheckAuth,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

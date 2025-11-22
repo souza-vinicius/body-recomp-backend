@@ -184,12 +184,17 @@ export default function GoalsScreen() {
 
         {/* Show create goal form if no active goal */}
         {!activeGoal && (
-          <VStack space="xl">
+          <Card
+            title={showForm ? 'Create New Goal' : 'No Active Goal'}
+            subtitle={
+              showForm
+                ? 'Define your body recomposition target and timeline.'
+                : "You don't have an active goal. Create one to start tracking your progress!"
+            }
+            width="100%"
+          >
             {!showForm ? (
               <VStack space="md" alignItems="center">
-                <Text fontSize="$md" color="$textLight600" textAlign="center">
-                  You don't have an active goal. Create one to start tracking your progress!
-                </Text>
                 <Button
                   onPress={() => setShowForm(true)}
                   size="lg"
@@ -201,7 +206,7 @@ export default function GoalsScreen() {
             ) : (
               <VStack space="xl">
                 <Text fontSize="$lg" fontWeight="$semibold">
-                  Create New Goal
+                  Goal Details
                 </Text>
 
                 {/* Goal Type Selector - wrapped in plain View for visibility */}
@@ -278,7 +283,7 @@ export default function GoalsScreen() {
                 </View>
               </VStack>
             )}
-          </VStack>
+          </Card>
         )}
       </VStack>
     </ScrollView>
@@ -358,7 +363,7 @@ const MeasurementSelector: React.FC<MeasurementSelectorProps> = ({
           No measurements available. Create one first.
         </Text>
       )}
-      <VStack space="sm">
+            <VStack space="sm">
         {measurements.map((m) => (
           <Pressable
             key={m.id}

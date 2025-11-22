@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
-import { View, Text, VStack, HStack } from '@gluestack-ui/themed';
-import { StyleSheet, FlatList, RefreshControl } from 'react-native';
+import { View, Text, VStack, HStack, Icon, Heading } from '@gluestack-ui/themed';
+import { StyleSheet, FlatList, RefreshControl, UIManager } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getMeasurements, getLatestMeasurement, getMeasurementStats, deleteMeasurement } from '../../src/services/api/measurements';
 import { Measurement } from '../../src/types/measurements';
@@ -63,6 +64,30 @@ export default function MeasurementsScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Header */}
+      {UIManager.getViewManagerConfig && UIManager.getViewManagerConfig('ExpoLinearGradient') ? (
+        <LinearGradient
+          colors={["#2563EB", "#1D4ED8"]}
+          start={[0, 0]}
+          end={[1, 1]}
+          style={styles.header}
+        >
+          {/* @ts-ignore */}
+          <VStack space="xs">
+            <Heading style={styles.headerTitle}>Medidas</Heading>
+            <Text style={styles.headerSubtitle}>Veja suas últimas medições e tendências</Text>
+          </VStack>
+        </LinearGradient>
+      ) : (
+        <View style={[styles.header, { backgroundColor: '#2563EB' }]}> 
+          {/* @ts-ignore */}
+          <VStack space="xs">
+            <Heading style={styles.headerTitle}>Medidas</Heading>
+            <Text style={styles.headerSubtitle}>Veja suas últimas medições e tendências</Text>
+          </VStack>
+        </View>
+      )}
+
       <FlatList
         data={measurements}
         keyExtractor={(item) => item.id}
@@ -155,25 +180,60 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 16,
-    paddingBottom: 48,
+    paddingBottom: 64,
   },
   headerWrapper: {
     paddingHorizontal: 8,
     paddingTop: 8,
+  },
+  header: {
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    marginTop: 8,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  headerSubtitle: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.9)',
+    marginTop: 4,
   },
   headerRow: {
     paddingHorizontal: 8,
   },
   card: {
     width: '100%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   emptyCard: {
     width: '100%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
     alignItems: 'center',
-    paddingVertical: 32,
+    paddingVertical: 24,
+    paddingHorizontal: 18,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 1,
   },
   statsRow: {
     width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   emptyText: {
     textAlign: 'center',
