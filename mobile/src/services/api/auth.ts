@@ -36,7 +36,9 @@ export const login = async (data: LoginRequest): Promise<LoginResponse> => {
  * Logout and invalidate refresh token
  */
 export const logout = async (): Promise<void> => {
-  await apiClient.post('/auth/logout');
+  // Backend is stateless (JWT), so no API call needed for logout.
+  // Just return success so the client can clear tokens.
+  return Promise.resolve();
 };
 
 /**
