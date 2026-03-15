@@ -5,8 +5,12 @@ import asyncio
 from typing import AsyncGenerator, Generator
 import pytest
 import pytest_asyncio
-from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 from sqlalchemy.pool import NullPool
 
 from src.core.database import Base
@@ -15,7 +19,10 @@ from src.core.database import get_db
 from src.core.config import settings
 
 # Test database URL (using different database for tests)
-TEST_DATABASE_URL = settings.DATABASE_URL.replace("/body_recomp", "/body_recomp_test")
+TEST_DATABASE_URL = settings.DATABASE_URL.replace(
+    "/body_recomp",
+    "/body_recomp_test",
+)
 
 
 @pytest.fixture(scope="session")
@@ -47,8 +54,17 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
     Creates all tables before test and drops them after.
     """
     from sqlalchemy import text
-    
+
     async with test_engine.begin() as conn:
+        # Reset enum types so test schema stays aligned with migrations.
+        await conn.execute(text("DROP TYPE IF EXISTS goalstatus CASCADE"))
+        await conn.execute(text("DROP TYPE IF EXISTS goaltype CASCADE"))
+        await conn.execute(text("DROP TYPE IF EXISTS activitylevel CASCADE"))
+        await conn.execute(
+            text("DROP TYPE IF EXISTS calculationmethod CASCADE")
+        )
+        await conn.execute(text("DROP TYPE IF EXISTS gender CASCADE"))
+
         # Create enum types first
         await conn.execute(text("""
             DO $$ BEGIN
@@ -57,42 +73,51 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
                 WHEN duplicate_object THEN null;
             END $$;
         """))
-        
+
         await conn.execute(text("""
             DO $$ BEGIN
-                CREATE TYPE calculationmethod AS ENUM ('navy', '3_site', '7_site');
+                CREATE TYPE calculationmethod AS ENUM (
+                    'navy', '3_site', '7_site'
+                );
             EXCEPTION
                 WHEN duplicate_object THEN null;
             END $$;
         """))
-        
+
         await conn.execute(text("""
             DO $$ BEGIN
                 CREATE TYPE activitylevel AS ENUM (
-                    'sedentary', 'lightly_active', 'moderately_active', 
+                    'sedentary', 'lightly_active', 'moderately_active',
                     'very_active', 'extremely_active'
                 );
             EXCEPTION
                 WHEN duplicate_object THEN null;
             END $$;
         """))
-        
+
         await conn.execute(text("""
             DO $$ BEGIN
-                CREATE TYPE goaltype AS ENUM ('cutting', 'bulking');
+                CREATE TYPE goaltype AS ENUM ('CUTTING', 'BULKING');
             EXCEPTION
                 WHEN duplicate_object THEN null;
             END $$;
         """))
-        
+
         await conn.execute(text("""
             DO $$ BEGIN
-                CREATE TYPE goalstatus AS ENUM ('active', 'completed', 'cancelled');
+                CREATE TYPE goalstatus AS ENUM (
+                    'ACTIVE',
+                    'COMPLETED',
+                    'CANCELLED',
+                    'active',
+                    'completed',
+                    'cancelled'
+                );
             EXCEPTION
                 WHEN duplicate_object THEN null;
             END $$;
         """))
-        
+
         # Now create all tables
         await conn.run_sync(Base.metadata.create_all)
 
@@ -105,7 +130,9 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
 
 
 @pytest_asyncio.fixture(scope="function")
-async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
+async def client(
+    db_session: AsyncSession,
+) -> AsyncGenerator[AsyncClient, None]:
     """
     Create an HTTP client for testing API endpoints.
     """
@@ -114,7 +141,11 @@ async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
 
     app.dependency_overrides[get_db] = override_get_db
 
-    async with AsyncClient(app=app, base_url="http://test") as test_client:
+    transport = ASGITransport(app=app)
+    async with AsyncClient(
+        transport=transport,
+        base_url="http://test",
+    ) as test_client:
         yield test_client
 
     app.dependency_overrides.clear()
@@ -158,7 +189,7 @@ async def auth_headers(test_user: dict) -> dict:
     Get authentication headers with a valid JWT token.
     """
     from src.core.security import create_access_token
-    
+
     token = create_access_token(data={"sub": test_user["id"]})
     return {"Authorization": f"Bearer {token}"}
 
@@ -174,7 +205,7 @@ async def test_measurement(
     from src.models.measurement import BodyMeasurement
     from src.models.enums import CalculationMethod
     from decimal import Decimal
-    
+
     measurement = BodyMeasurement(
         user_id=test_user["id"],
         weight_kg=Decimal("80.0"),
@@ -186,11 +217,11 @@ async def test_measurement(
         measured_at=datetime.now(),
         created_at=datetime.now(),
     )
-    
+
     db_session.add(measurement)
     await db_session.commit()
     await db_session.refresh(measurement)
-    
+
     return {
         "id": str(measurement.id),
         "user_id": str(measurement.user_id),
@@ -213,7 +244,7 @@ async def test_goal(
     from src.models.goal import Goal
     from src.models.enums import GoalType, GoalStatus
     from decimal import Decimal
-    
+
     goal = Goal(
         user_id=test_user["id"],
         goal_type=GoalType.CUTTING,
@@ -229,11 +260,11 @@ async def test_goal(
         created_at=datetime.now(),
         updated_at=datetime.now(),
     )
-    
+
     db_session.add(goal)
     await db_session.commit()
     await db_session.refresh(goal)
-    
+
     return {
         "id": str(goal.id),
         "user_id": str(goal.user_id),
@@ -260,7 +291,7 @@ async def other_user_goal(db_session: AsyncSession) -> dict:
     )
     from src.core.security import get_password_hash
     from decimal import Decimal
-    
+
     # Create other user
     other_user = User(
         email="other@example.com",
@@ -274,7 +305,7 @@ async def other_user_goal(db_session: AsyncSession) -> dict:
     )
     db_session.add(other_user)
     await db_session.flush()
-    
+
     # Create measurement for other user
     other_measurement = BodyMeasurement(
         user_id=other_user.id,
@@ -289,7 +320,7 @@ async def other_user_goal(db_session: AsyncSession) -> dict:
     )
     db_session.add(other_measurement)
     await db_session.flush()
-    
+
     # Create goal for other user
     other_goal = Goal(
         user_id=other_user.id,
@@ -309,7 +340,7 @@ async def other_user_goal(db_session: AsyncSession) -> dict:
     db_session.add(other_goal)
     await db_session.commit()
     await db_session.refresh(other_goal)
-    
+
     return {
         "id": str(other_goal.id),
         "user_id": str(other_user.id),
