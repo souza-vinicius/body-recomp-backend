@@ -2,8 +2,6 @@
 Measurements API router for Body Recomp Backend.
 """
 from datetime import datetime
-from uuid import UUID
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,6 +14,7 @@ from src.schemas.measurement import (
     BodyMeasurementResponse,
 )
 from src.services.body_fat_calculator import BodyFatCalculator
+from src.services.validation_service import MeasurementValidator
 
 router = APIRouter(prefix="/measurements", tags=["measurements"])
 
@@ -38,25 +37,25 @@ async def create_measurement(
 ) -> BodyMeasurement:
     """
     Create a new body measurement.
-    
+
     Required measurements by method:
     - **Navy**: waist_cm, neck_cm, (hip_cm for women)
     - **3-Site**: chest/abdomen/thigh (men) OR tricep/suprailiac/thigh (women)
     - **7-Site**: All 7 skinfold measurements
-    
+
     The body fat percentage is automatically calculated based on:
     - User's gender, age, height
     - Selected calculation method
     - Provided measurements
-    
+
     Returns the created measurement with calculated body fat percentage.
     """
     # Calculate age from date of birth
     age = (datetime.utcnow() - current_user.date_of_birth).days // 365
-    
+
     # Initialize calculator
     calculator = BodyFatCalculator()
-    
+
     # Calculate body fat percentage based on method
     if measurement_data.calculation_method.value == "navy":
         body_fat = calculator.calculate_navy(
@@ -130,7 +129,19 @@ async def create_measurement(
             detail=f"Unknown calculation method: "
             f"{measurement_data.calculation_method}",
         )
-    
+
+    is_valid_body_fat, body_fat_error = (
+        MeasurementValidator.validate_body_fat_range(
+            body_fat_percentage=body_fat,
+            gender=current_user.gender,
+        )
+    )
+    if not is_valid_body_fat:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=body_fat_error,
+        )
+
     # Create measurement
     measurement = BodyMeasurement(
         user_id=current_user.id,
@@ -151,9 +162,9 @@ async def create_measurement(
         measured_at=measurement_data.measured_at,
         created_at=datetime.utcnow(),
     )
-    
+
     db.add(measurement)
     await db.commit()
     await db.refresh(measurement)
-    
+
     return measurement

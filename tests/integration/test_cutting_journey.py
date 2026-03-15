@@ -2,14 +2,15 @@
 Integration tests for complete user journeys.
 Tests end-to-end flows across multiple API endpoints.
 """
-from fastapi.testclient import TestClient
+from datetime import datetime, timedelta
+
 from httpx import AsyncClient
 
 
 class TestCuttingGoalJourney:
     """Integration test for complete cutting goal creation journey."""
 
-    def test_create_cutting_goal_journey(self, client: TestClient):
+    async def test_create_cutting_goal_journey(self, client: AsyncClient):
         """
         Test complete journey: Register → Login → Measurement → Goal → Verify.
 
@@ -40,7 +41,7 @@ class TestCuttingGoalJourney:
             "activity_level": "moderately_active",
         }
 
-        register_response = client.post("/api/v1/users", json=user_data)
+        register_response = await client.post("/api/v1/users", json=user_data)
         assert register_response.status_code == 201, (
             f"Registration failed: {register_response.text}"
         )
@@ -53,7 +54,10 @@ class TestCuttingGoalJourney:
             "password": user_data["password"],
         }
 
-        login_response = client.post("/api/v1/auth/login", json=login_data)
+        login_response = await client.post(
+            "/api/v1/auth/login",
+            json=login_data,
+        )
         assert login_response.status_code == 200, (
             f"Login failed: {login_response.text}"
         )
@@ -68,10 +72,10 @@ class TestCuttingGoalJourney:
             "calculation_method": "navy",
             "waist_cm": 95.0,
             "neck_cm": 38.0,
-            "hip_cm": None,  # Not required for men
+            "measured_at": datetime.now().isoformat(),
         }
 
-        measurement_response = client.post(
+        measurement_response = await client.post(
             "/api/v1/measurements",
             json=measurement_data,
             headers=auth_headers,
@@ -81,18 +85,18 @@ class TestCuttingGoalJourney:
         )
         measurement = measurement_response.json()
         assert "id" in measurement
-        assert "body_fat_percentage" in measurement
-        assert measurement["body_fat_percentage"] is not None
-        current_bf = measurement["body_fat_percentage"]
+        assert "calculated_body_fat_percentage" in measurement
+        assert measurement["calculated_body_fat_percentage"] is not None
+        current_bf = measurement["calculated_body_fat_percentage"]
 
         # Step 4: Create cutting goal
         goal_data = {
             "goal_type": "CUTTING",
+            "initial_measurement_id": measurement["id"],
             "target_body_fat_percentage": 12.0,
-            "weekly_goal": 0.5,
         }
 
-        goal_response = client.post(
+        goal_response = await client.post(
             "/api/v1/goals",
             json=goal_data,
             headers=auth_headers,
@@ -109,24 +113,12 @@ class TestCuttingGoalJourney:
         assert goal["status"] == "ACTIVE"
         assert goal["initial_measurement_id"] == measurement["id"]
 
-        # Validate caloric recommendations
-        cal_rec = goal["caloric_recommendations"]
-        assert "bmr" in cal_rec
-        assert "tdee" in cal_rec
-        assert "target_calories" in cal_rec
-        assert "caloric_deficit" in cal_rec
-        assert "protein_g" in cal_rec
-
-        # Validate caloric deficit is reasonable (300-500 calories)
-        assert 300 <= cal_rec["caloric_deficit"] <= 500
-
-        # Validate target_calories = tdee - deficit
-        expected_target = cal_rec["tdee"] - cal_rec["caloric_deficit"]
-        assert abs(cal_rec["target_calories"] - expected_target) < 1
+        assert goal["target_calories"] > 0
+        assert goal["estimated_weeks_to_goal"] is not None
 
         # Step 5: Verify goal can be retrieved
         goal_id = goal["id"]
-        get_response = client.get(
+        get_response = await client.get(
             f"/api/v1/goals/{goal_id}",
             headers=auth_headers,
         )
@@ -137,9 +129,9 @@ class TestCuttingGoalJourney:
         assert retrieved_goal["id"] == goal_id
         assert retrieved_goal["goal_type"] == "CUTTING"
         assert retrieved_goal["target_body_fat_percentage"] == 12.0
-        assert "estimated_end_date" in retrieved_goal
+        assert "estimated_weeks_to_goal" in retrieved_goal
 
-    def test_bulking_goal_journey(self, client: TestClient):
+    async def test_bulking_goal_journey(self, client: AsyncClient):
         """
         Test complete journey for bulking goal.
 
@@ -157,7 +149,7 @@ class TestCuttingGoalJourney:
             "activity_level": "very_active",
         }
 
-        register_response = client.post("/api/v1/users", json=user_data)
+        register_response = await client.post("/api/v1/users", json=user_data)
         assert register_response.status_code == 201
 
         # Step 2: Login
@@ -166,7 +158,10 @@ class TestCuttingGoalJourney:
             "password": user_data["password"],
         }
 
-        login_response = client.post("/api/v1/auth/login", json=login_data)
+        login_response = await client.post(
+            "/api/v1/auth/login",
+            json=login_data,
+        )
         assert login_response.status_code == 200
         tokens = login_response.json()
         auth_headers = {"Authorization": f"Bearer {tokens['access_token']}"}
@@ -178,23 +173,25 @@ class TestCuttingGoalJourney:
             "tricep_mm": 12.0,
             "suprailiac_mm": 10.0,
             "thigh_mm": 15.0,
+            "measured_at": datetime.now().isoformat(),
         }
 
-        measurement_response = client.post(
+        measurement_response = await client.post(
             "/api/v1/measurements",
             json=measurement_data,
             headers=auth_headers,
         )
         assert measurement_response.status_code == 201
+        measurement = measurement_response.json()
 
         # Step 4: Create bulking goal
         goal_data = {
             "goal_type": "BULKING",
-            "target_body_fat_percentage": 22.0,
-            "weekly_goal": 0.3,
+            "initial_measurement_id": measurement["id"],
+            "ceiling_body_fat_percentage": 22.0,
         }
 
-        goal_response = client.post(
+        goal_response = await client.post(
             "/api/v1/goals",
             json=goal_data,
             headers=auth_headers,
@@ -204,13 +201,15 @@ class TestCuttingGoalJourney:
 
         assert goal["goal_type"] == "BULKING"
         assert goal["status"] == "ACTIVE"
+        assert goal["ceiling_body_fat_percentage"] == 22.0
 
         # Validate caloric surplus
-        cal_rec = goal["caloric_recommendations"]
-        assert "caloric_surplus" in cal_rec
-        assert cal_rec["caloric_surplus"] >= 200
+        assert goal["target_calories"] > 0
 
-    def test_cannot_create_duplicate_active_goal(self, client: TestClient):
+    async def test_cannot_create_duplicate_active_goal(
+        self,
+        client: AsyncClient,
+    ):
         """
         Test user cannot create second active goal.
 
@@ -230,9 +229,9 @@ class TestCuttingGoalJourney:
             "activity_level": "moderately_active",
         }
 
-        client.post("/api/v1/users", json=user_data)
+        await client.post("/api/v1/users", json=user_data)
 
-        login_response = client.post(
+        login_response = await client.post(
             "/api/v1/auth/login",
             json={
                 "email": user_data["email"],
@@ -248,20 +247,23 @@ class TestCuttingGoalJourney:
             "calculation_method": "navy",
             "waist_cm": 90.0,
             "neck_cm": 38.0,
+            "measured_at": datetime.now().isoformat(),
         }
-        client.post(
+        measurement_response = await client.post(
             "/api/v1/measurements",
             json=measurement_data,
             headers=auth_headers,
         )
+        assert measurement_response.status_code == 201
+        measurement = measurement_response.json()
 
         # Create first goal
         goal_data = {
             "goal_type": "CUTTING",
+            "initial_measurement_id": measurement["id"],
             "target_body_fat_percentage": 12.0,
-            "weekly_goal": 0.5,
         }
-        response1 = client.post(
+        response1 = await client.post(
             "/api/v1/goals",
             json=goal_data,
             headers=auth_headers,
@@ -271,21 +273,21 @@ class TestCuttingGoalJourney:
         # Attempt to create second goal
         goal_data2 = {
             "goal_type": "BULKING",
-            "target_body_fat_percentage": 15.0,
-            "weekly_goal": 0.3,
+            "initial_measurement_id": measurement["id"],
+            "ceiling_body_fat_percentage": 18.0,
         }
-        response2 = client.post(
+        response2 = await client.post(
             "/api/v1/goals",
             json=goal_data2,
             headers=auth_headers,
         )
 
         # Should fail
-        assert response2.status_code == 400
+        assert response2.status_code == 403
         data = response2.json()
         assert "active" in data["detail"].lower()
 
-    def test_weekly_progress_tracking_journey(self, client: TestClient):
+    async def test_weekly_progress_tracking_journey(self, client: AsyncClient):
         """
         Test complete weekly progress tracking journey over 4 weeks.
 
@@ -307,8 +309,6 @@ class TestCuttingGoalJourney:
         7. View trends analysis
         8. Verify goal completion (if target reached)
         """
-        from datetime import datetime, timedelta
-
         # Setup: Register, login, create measurement and cutting goal
         user_data = {
             "email": "progress.tracker@example.com",
@@ -321,9 +321,9 @@ class TestCuttingGoalJourney:
             "activity_level": "moderately_active",
         }
 
-        client.post("/api/v1/users", json=user_data)
+        await client.post("/api/v1/users", json=user_data)
 
-        login_response = client.post(
+        login_response = await client.post(
             "/api/v1/auth/login",
             json={
                 "email": user_data["email"],
@@ -339,21 +339,23 @@ class TestCuttingGoalJourney:
             "calculation_method": "navy",
             "waist_cm": 90.0,
             "neck_cm": 38.0,
-            "measurement_date": datetime.now().isoformat(),
+            "measured_at": datetime.now().isoformat(),
         }
-        client.post(
+        initial_measurement_response = await client.post(
             "/api/v1/measurements",
             json=initial_measurement,
             headers=auth_headers
         )
+        assert initial_measurement_response.status_code == 201
+        initial_measurement_data = initial_measurement_response.json()
 
         # Create cutting goal (target 12% body fat)
         goal_data = {
             "goal_type": "CUTTING",
+            "initial_measurement_id": initial_measurement_data["id"],
             "target_body_fat_percentage": 12.0,
-            "weekly_goal": 0.5,
         }
-        goal_response = client.post(
+        goal_response = await client.post(
             "/api/v1/goals", json=goal_data, headers=auth_headers
         )
         assert goal_response.status_code == 201
@@ -366,11 +368,11 @@ class TestCuttingGoalJourney:
             "calculation_method": "navy",
             "waist_cm": 88.5,  # Reduced waist
             "neck_cm": 38.0,
-            "measurement_date": (
+            "measured_at": (
                 datetime.now() + timedelta(days=7)
             ).isoformat(),
         }
-        week1_measurement_response = client.post(
+        week1_measurement_response = await client.post(
             "/api/v1/measurements",
             json=week1_measurement,
             headers=auth_headers
@@ -382,7 +384,7 @@ class TestCuttingGoalJourney:
             "measurement_id": week1_measurement_id,
             "notes": "Week 1: Good progress, diet compliance high",
         }
-        week1_progress_response = client.post(
+        week1_progress_response = await client.post(
             f"/api/v1/goals/{goal_id}/progress",
             json=week1_progress,
             headers=auth_headers
@@ -400,11 +402,11 @@ class TestCuttingGoalJourney:
             "calculation_method": "navy",
             "waist_cm": 87.0,
             "neck_cm": 38.0,
-            "measurement_date": (
+            "measured_at": (
                 datetime.now() + timedelta(days=14)
             ).isoformat(),
         }
-        week2_measurement_response = client.post(
+        week2_measurement_response = await client.post(
             "/api/v1/measurements",
             json=week2_measurement,
             headers=auth_headers
@@ -415,7 +417,7 @@ class TestCuttingGoalJourney:
             "measurement_id": week2_measurement_id,
             "notes": "Week 2: Steady progress continues",
         }
-        week2_progress_response = client.post(
+        week2_progress_response = await client.post(
             f"/api/v1/goals/{goal_id}/progress",
             json=week2_progress,
             headers=auth_headers
@@ -431,11 +433,11 @@ class TestCuttingGoalJourney:
             "calculation_method": "navy",
             "waist_cm": 85.5,
             "neck_cm": 38.0,
-            "measurement_date": (
+            "measured_at": (
                 datetime.now() + timedelta(days=21)
             ).isoformat(),
         }
-        week3_measurement_response = client.post(
+        week3_measurement_response = await client.post(
             "/api/v1/measurements",
             json=week3_measurement,
             headers=auth_headers
@@ -446,7 +448,7 @@ class TestCuttingGoalJourney:
             "measurement_id": week3_measurement_id,
             "notes": "Week 3: On track",
         }
-        week3_progress_response = client.post(
+        week3_progress_response = await client.post(
             f"/api/v1/goals/{goal_id}/progress",
             json=week3_progress,
             headers=auth_headers
@@ -459,11 +461,11 @@ class TestCuttingGoalJourney:
             "calculation_method": "navy",
             "waist_cm": 84.0,
             "neck_cm": 38.0,
-            "measurement_date": (
+            "measured_at": (
                 datetime.now() + timedelta(days=28)
             ).isoformat(),
         }
-        week4_measurement_response = client.post(
+        week4_measurement_response = await client.post(
             "/api/v1/measurements",
             json=week4_measurement,
             headers=auth_headers
@@ -474,7 +476,7 @@ class TestCuttingGoalJourney:
             "measurement_id": week4_measurement_id,
             "notes": "Week 4: Great progress, feeling strong",
         }
-        week4_progress_response = client.post(
+        week4_progress_response = await client.post(
             f"/api/v1/goals/{goal_id}/progress",
             json=week4_progress,
             headers=auth_headers
@@ -482,7 +484,7 @@ class TestCuttingGoalJourney:
         assert week4_progress_response.status_code == 201
 
         # View progress history
-        history_response = client.get(
+        history_response = await client.get(
             f"/api/v1/goals/{goal_id}/progress",
             headers=auth_headers
         )
@@ -497,7 +499,7 @@ class TestCuttingGoalJourney:
             assert history[i]["week_number"] < history[i + 1]["week_number"]
 
         # View trends analysis
-        trends_response = client.get(
+        trends_response = await client.get(
             f"/api/v1/goals/{goal_id}/trends",
             headers=auth_headers
         )

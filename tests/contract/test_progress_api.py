@@ -527,7 +527,7 @@ class TestBulkingProgressContracts:
         current_bf = near_ceiling_meas["calculated_body_fat_percentage"]
 
         # If within 1% of ceiling, warning should be present
-        if abs(current_bf - 18.0) <= 1.0:
+        if current_bf >= 18.0 or abs(current_bf - 18.0) <= 1.0:
             assert progress["ceiling_warning"] is not None
             assert "ceiling" in progress["ceiling_warning"].lower()
         else:
@@ -594,7 +594,7 @@ class TestBulkingProgressContracts:
 
         # Step 3: Create bulking goal with 18% ceiling
         goal_data = {
-            "goal_type": "bulking",
+            "goal_type": "BULKING",
             "initial_measurement_id": initial_measurement["id"],
             "ceiling_body_fat_percentage": 18.0,
         }

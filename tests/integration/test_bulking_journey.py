@@ -318,7 +318,7 @@ class TestBulkingGoalCreation:
         week3_entry = week3_progress_response.json()
 
         # US4 Acceptance #2: Should warn when within 1% of ceiling
-        if abs(week3_bf - 18.0) <= 1.0:
+        if week3_bf >= 18.0 or abs(week3_bf - 18.0) <= 1.0:
             assert week3_entry["ceiling_warning"] is not None
             assert "ceiling" in week3_entry["ceiling_warning"].lower()
 
@@ -328,6 +328,15 @@ class TestBulkingGoalCreation:
         )
         assert goal_check_response.status_code == 200
         goal_check = goal_check_response.json()
+        if week3_bf >= 18.0:
+            assert goal_check["status"] == "COMPLETED"
+            progress_history_response = await client.get(
+                f"/api/v1/goals/{goal_id}/progress", headers=auth_headers
+            )
+            assert progress_history_response.status_code == 200
+            progress_history = progress_history_response.json()
+            assert len(progress_history) == 3
+            return
         if week3_bf < 18.0:
             assert goal_check["status"] == "ACTIVE"
 

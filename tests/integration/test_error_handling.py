@@ -2,9 +2,10 @@
 Integration tests for error handling scenarios.
 Tests T109: Comprehensive error scenario testing.
 """
+from datetime import timedelta
+
 import pytest
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.security import create_access_token
 from src.models.user import User
@@ -31,7 +32,7 @@ class TestErrorHandling:
 
         assert response.status_code == 422
         data = response.json()
-        
+
         # Check RFC 7807 format
         assert "type" in data
         assert "title" in data
@@ -66,7 +67,6 @@ class TestErrorHandling:
     async def test_not_found_error_404(
         self,
         client: AsyncClient,
-        test_user: User,
         test_token: str,
     ):
         """Test not found error returns RFC 7807 format."""
@@ -78,7 +78,7 @@ class TestErrorHandling:
 
         assert response.status_code == 404
         data = response.json()
-        
+
         # Check RFC 7807 format
         assert data["type"] == "about:blank"
         assert data["title"] == "Not Found"
@@ -116,47 +116,18 @@ class TestErrorHandling:
     async def test_forbidden_error_403(
         self,
         client: AsyncClient,
-        test_user: User,
         test_token: str,
-        db_session: AsyncSession,
+        other_user_goal: dict,
     ):
         """Test forbidden access to other user's resources."""
-        # Create another user
-        from src.services.user_service import UserService
-        
-        other_user = await UserService.create_user(
-            db_session,
-            email="other@example.com",
-            password="OtherPass123!",
-            full_name="Other User",
-            date_of_birth="1995-01-01",
-            gender="male",
-            height_cm=180.0,
-        )
-        await db_session.commit()
-
-        # Create measurement for other user
-        from src.services.measurement_service import MeasurementService
-        
-        measurement = await MeasurementService.create_measurement(
-            db_session,
-            user_id=other_user.id,
-            weight_kg=75.0,
-            calculation_method="navy",
-            waist_cm=80.0,
-            neck_cm=38.0,
-            measured_at="2024-01-01T10:00:00",
-        )
-        await db_session.commit()
-
-        # Try to access other user's measurement with test_user's token
+        # Try to access another user's goal with test user's token
         response = await client.get(
-            f"/api/v1/measurements/{measurement.id}",
+            f"/api/v1/goals/{other_user_goal['id']}",
             headers={"Authorization": f"Bearer {test_token}"},
         )
 
-        # Should either be 403 or 404 depending on implementation
-        assert response.status_code in [403, 404]
+        # Implementation returns 404 to avoid disclosing resource existence.
+        assert response.status_code == 404
 
     @pytest.mark.asyncio
     async def test_bad_request_error_400(
@@ -208,7 +179,7 @@ class TestErrorHandling:
         if response.status_code == 400:
             data = response.json()
             assert "body fat" in data["detail"].lower()
-            assert "unrealistically low" in data["detail"].lower()
+            assert "too low" in data["detail"].lower()
 
     @pytest.mark.asyncio
     async def test_body_fat_edge_case_too_high(
@@ -271,12 +242,14 @@ class TestErrorHandling:
         response = await client.post(
             "/api/v1/users",
             json={
-                "email": test_user.email,  # Duplicate
+                "email": test_user["email"],  # Duplicate
                 "password": "AnotherPass123!",
                 "full_name": "Another User",
                 "date_of_birth": "1995-01-01",
                 "gender": "male",
                 "height_cm": 175.0,
+                "preferred_calculation_method": "navy",
+                "activity_level": "moderately_active",
             },
         )
 
@@ -293,8 +266,8 @@ class TestErrorHandling:
         """Test invalid login credentials return 401."""
         response = await client.post(
             "/api/v1/auth/login",
-            data={
-                "username": test_user.email,
+            json={
+                "email": test_user["email"],
                 "password": "WrongPassword123!",
             },
         )
@@ -312,8 +285,8 @@ class TestErrorHandling:
         """Test expired token returns 401."""
         # Create token that's already expired
         expired_token = create_access_token(
-            data={"sub": str(test_user.id)},
-            expires_minutes=-10,  # Already expired
+            data={"sub": str(test_user["id"])},
+            expires_delta=timedelta(minutes=-10),
         )
 
         response = await client.get(

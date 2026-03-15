@@ -41,7 +41,7 @@ class TestBMRCalculation:
         service = GoalService()
         
         # Female: 65kg, 165cm, 28 years old
-        # BMR = 10 × 65 + 6.25 × 165 - 5 × 28 - 161 = 1370.25 ≈ 1370
+        # BMR = 10 × 65 + 6.25 × 165 - 5 × 28 - 161 = 1380.25 ≈ 1380
         bmr = service.calculate_bmr(
             weight_kg=Decimal("65.0"),
             height_cm=Decimal("165.0"),
@@ -50,7 +50,7 @@ class TestBMRCalculation:
         )
         
         assert isinstance(bmr, int)
-        assert bmr == 1370
+        assert bmr == 1380
     
     def test_calculate_bmr_male_higher_than_female(self):
         """Test that males have higher BMR than females with same measurements."""
@@ -102,7 +102,7 @@ class TestTDEECalculation:
         
         tdee = service.calculate_tdee(bmr, ActivityLevel.MODERATELY_ACTIVE)
         
-        assert tdee == 2713  # 1750 × 1.55
+        assert tdee == 2712  # 1750 × 1.55 = 2712.5, Python rounds to even
     
     def test_calculate_tdee_very_active(self):
         """Test TDEE with very active level (1.725x)."""
@@ -421,13 +421,27 @@ class TestActiveGoalCheck:
         )
         db_session.add(user)
         await db_session.flush()
+
+        measurement = BodyMeasurement(
+            user_id=user.id,
+            weight_kg=Decimal("80.0"),
+            calculation_method=CalculationMethod.NAVY,
+            waist_cm=Decimal("90.0"),
+            neck_cm=Decimal("38.0"),
+            hip_cm=None,
+            calculated_body_fat_percentage=Decimal("20.0"),
+            measured_at=datetime.utcnow(),
+            created_at=datetime.utcnow(),
+        )
+        db_session.add(measurement)
+        await db_session.flush()
         
         # Create active goal
         goal = Goal(
             user_id=user.id,
             goal_type=GoalType.CUTTING,
             status=GoalStatus.ACTIVE,
-            initial_measurement_id=uuid4(),
+            initial_measurement_id=measurement.id,
             initial_body_fat_percentage=Decimal("20.0"),
             target_body_fat_percentage=Decimal("15.0"),
             initial_weight_kg=Decimal("80.0"),
@@ -483,13 +497,27 @@ class TestActiveGoalCheck:
         )
         db_session.add(user)
         await db_session.flush()
+
+        measurement = BodyMeasurement(
+            user_id=user.id,
+            weight_kg=Decimal("80.0"),
+            calculation_method=CalculationMethod.NAVY,
+            waist_cm=Decimal("90.0"),
+            neck_cm=Decimal("38.0"),
+            hip_cm=None,
+            calculated_body_fat_percentage=Decimal("20.0"),
+            measured_at=datetime.utcnow(),
+            created_at=datetime.utcnow(),
+        )
+        db_session.add(measurement)
+        await db_session.flush()
         
         # Create completed goal
         goal = Goal(
             user_id=user.id,
             goal_type=GoalType.CUTTING,
             status=GoalStatus.COMPLETED,  # Not active
-            initial_measurement_id=uuid4(),
+            initial_measurement_id=measurement.id,
             initial_body_fat_percentage=Decimal("20.0"),
             target_body_fat_percentage=Decimal("15.0"),
             initial_weight_kg=Decimal("80.0"),

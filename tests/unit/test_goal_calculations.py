@@ -6,7 +6,7 @@ import pytest
 from decimal import Decimal
 
 from src.services.goal_service import GoalService
-from src.models.enums import Gender, ActivityLevel
+from src.models.enums import ActivityLevel, Gender, GoalType
 
 
 class TestBMRCalculation:
@@ -205,7 +205,7 @@ class TestGoalSafetyValidation:
         
         with pytest.raises(ValueError, match="Target body fat too low"):
             await service.validate_goal_safety(
-                goal_type="cutting",
+                goal_type=GoalType.CUTTING,
                 current_bf=Decimal("15.0"),
                 target_bf=Decimal("5.0"),
                 ceiling_bf=None,
@@ -219,7 +219,7 @@ class TestGoalSafetyValidation:
         
         with pytest.raises(ValueError, match="Target body fat too low"):
             await service.validate_goal_safety(
-                goal_type="cutting",
+                goal_type=GoalType.CUTTING,
                 current_bf=Decimal("25.0"),
                 target_bf=Decimal("12.0"),
                 ceiling_bf=None,
@@ -233,7 +233,7 @@ class TestGoalSafetyValidation:
         
         with pytest.raises(ValueError, match="Ceiling body fat too high"):
             await service.validate_goal_safety(
-                goal_type="bulking",
+                goal_type=GoalType.BULKING,
                 current_bf=Decimal("12.0"),
                 target_bf=None,
                 ceiling_bf=Decimal("35.0"),

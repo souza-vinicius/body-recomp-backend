@@ -195,6 +195,14 @@ async def auth_headers(test_user: dict) -> dict:
 
 
 @pytest_asyncio.fixture
+async def test_token(test_user: dict) -> str:
+    """Get a valid JWT token string for the test user."""
+    from src.core.security import create_access_token
+
+    return create_access_token(data={"sub": test_user["id"]})
+
+
+@pytest_asyncio.fixture
 async def test_measurement(
     db_session: AsyncSession, test_user: dict
 ) -> dict:

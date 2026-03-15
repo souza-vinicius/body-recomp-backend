@@ -5,9 +5,10 @@ import logging
 import time
 import uuid
 from contextlib import asynccontextmanager
+from http import HTTPStatus
 from typing import AsyncGenerator
 
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -210,6 +211,29 @@ async def value_error_handler(request: Request, exc: ValueError):
             "detail": str(exc),
             "instance": str(request.url),
         },
+    )
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """Handle HTTP exceptions with RFC 7807 format."""
+    try:
+        title = HTTPStatus(exc.status_code).phrase
+    except ValueError:
+        title = "HTTP Error"
+
+    content = {
+        "type": "about:blank",
+        "title": title,
+        "status": exc.status_code,
+        "detail": exc.detail,
+        "instance": str(request.url),
+    }
+
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=content,
+        headers=exc.headers,
     )
 
 
