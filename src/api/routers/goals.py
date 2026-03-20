@@ -11,6 +11,7 @@ from src.core.database import get_db
 from src.core.deps import get_current_user
 from src.models.user import User
 from src.models.goal import Goal
+from src.models.enums import GoalStatus
 from src.schemas.goal import GoalCreate, GoalResponse
 from src.services.goal_service import GoalService
 
@@ -77,6 +78,33 @@ async def create_goal(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=error_msg,
         )
+
+
+@router.get(
+    "/active",
+    response_model=GoalResponse,
+    summary="Get the current active goal",
+    description="Returns the authenticated user's active goal, or 404 if none exists.",
+)
+async def get_active_goal(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> Goal:
+    """Return the user's single active goal."""
+    result = await db.execute(
+        select(Goal)
+        .where(Goal.user_id == current_user.id)
+        .where(Goal.status == GoalStatus.ACTIVE)
+    )
+    goal = result.scalar_one_or_none()
+
+    if not goal:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No active goal found",
+        )
+
+    return goal
 
 
 @router.get(

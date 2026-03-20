@@ -78,11 +78,11 @@ class TestProgressContractTests:
         assert "notes" in data
         assert "logged_at" in data
 
-    async def test_log_progress_entry_too_soon_fails(self, client: AsyncClient, test_user_with_goal):
-        """Test POST /api/v1/goals/{goal_id}/progress - reject if less than 7 days.
+    async def test_log_progress_entry_soon_succeeds(self, client: AsyncClient, test_user_with_goal):
+        """Test POST /api/v1/goals/{goal_id}/progress - allow if less than 7 days (daily logging).
 
-        Contract: FR-009 (minimum 7 days between measurements)
-        Expected: 400 Bad Request
+        Contract: FR-override (Users can log progress every day, upserting if same day)
+        Expected: 201 Created
         """
         goal_id = test_user_with_goal["goal_id"]
         auth_headers = test_user_with_goal["auth_headers"]
@@ -114,8 +114,8 @@ class TestProgressContractTests:
             headers=auth_headers
         )
 
-        assert response.status_code == 400
-        assert "detail" in response.json()
+        assert response.status_code == 201
+        assert "id" in response.json()
 
     async def test_log_progress_entry_invalid_measurement_fails(
         self, client: AsyncClient, test_user_with_goal
@@ -579,7 +579,7 @@ class TestBulkingProgressContracts:
         measurement_data = {
             "weight_kg": 70.0,
             "calculation_method": "navy",
-            "waist_cm": 74.0,
+            "waist_cm": 81.7,
             "neck_cm": 40.0,
             "measured_at": datetime.now().isoformat(),
         }

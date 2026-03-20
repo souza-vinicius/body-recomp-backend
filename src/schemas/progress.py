@@ -4,6 +4,7 @@ from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator
+from src.schemas.measurement import BodyMeasurementResponse
 
 
 class ProgressEntryCreate(BaseModel):
@@ -23,6 +24,10 @@ class ProgressEntryCreate(BaseModel):
         max_length=1000,
         description="Optional notes about this week's progress"
     )
+    logged_at: Optional[datetime] = Field(
+        None,
+        description="Optional timestamp for the entry (defaults to now)"
+    )
 
     model_config = {
         "json_schema_extra": {
@@ -34,6 +39,24 @@ class ProgressEntryCreate(BaseModel):
             ]
         }
     }
+
+
+class ProgressEntryUpdate(BaseModel):
+    """Schema for updating an existing progress entry.
+
+    Notes and logged_at can be updated. Body measurements and derived
+    values are immutable once logged (edit the measurement instead).
+    """
+
+    notes: Optional[str] = Field(
+        None,
+        max_length=1000,
+        description="Updated notes about this week's progress"
+    )
+    logged_at: Optional[datetime] = Field(
+        None,
+        description="Updated timestamp for this progress entry"
+    )
 
 
 class ProgressEntryResponse(BaseModel):
@@ -74,6 +97,7 @@ class ProgressEntryResponse(BaseModel):
         None,
         description="Warning when body fat gain rate exceeds 0.5%/week"
     )
+    measurement: Optional[BodyMeasurementResponse] = None
 
     model_config = {
         "from_attributes": True,

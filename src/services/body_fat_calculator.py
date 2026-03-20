@@ -38,20 +38,27 @@ class BodyFatCalculator:
         Raises:
             ValueError: If required measurements are missing or invalid
         """
+        # The constants in the standard Navy formula (86.010, 70.041, etc.)
+        # expect measurements in inches. We must convert cm to inches first.
+        height_in = float(height_cm) / 2.54
+        waist_in = float(waist_cm) / 2.54
+        neck_in = float(neck_cm) / 2.54
+
         if gender == Gender.MALE:
             # Men: BF% = 86.010 × log10(waist - neck) - 70.041 × log10(height) + 36.76
             body_fat = (
-                86.010 * math.log10(float(waist_cm - neck_cm))
-                - 70.041 * math.log10(float(height_cm))
+                86.010 * math.log10(waist_in - neck_in)
+                - 70.041 * math.log10(height_in)
                 + 36.76
             )
         else:  # Female
             if hip_cm is None:
                 raise ValueError("Hip measurement required for women using Navy method")
+            hip_in = float(hip_cm) / 2.54
             # Women: BF% = 163.205 × log10(waist + hip - neck) - 97.684 × log10(height) - 78.387
             body_fat = (
-                163.205 * math.log10(float(waist_cm + hip_cm - neck_cm))
-                - 97.684 * math.log10(float(height_cm))
+                163.205 * math.log10(waist_in + hip_in - neck_in)
+                - 97.684 * math.log10(height_in)
                 - 78.387
             )
 

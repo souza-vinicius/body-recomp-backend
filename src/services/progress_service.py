@@ -95,21 +95,27 @@ class ProgressService:
         self,
         goal_id: UUID,
         measurement_id: UUID,
-        notes: Optional[str] = None
+        notes: Optional[str] = None,
+        logged_at: Optional[datetime] = None
     ) -> ProgressEntry:
         """Log a new progress entry for a goal.
+
+        If a progress entry already exists for the same calendar day,
+        it will be overwritten with the new measurement data.
 
         Args:
             goal_id: Goal to log progress for
             measurement_id: New measurement to log
             notes: Optional user notes
+            logged_at: Optional timestamp for the entry (defaults to now)
 
         Returns:
-            Created progress entry
+            Created or updated progress entry
 
         Raises:
-            ValueError: If measurement too soon (< 7 days), invalid goal, etc.
+            ValueError: If invalid goal, measurement, etc.
         """
+        entry_time = logged_at
         # Fetch goal with relationships
         goal_result = await self.db.execute(
             select(Goal)
@@ -136,35 +142,40 @@ class ProgressService:
         if not measurement:
             raise ValueError(f"Measurement {measurement_id} not found")
 
+        # Resolve entry time fallback
+        if not entry_time:
+            entry_time = measurement.measured_at
+
         # Check measurement belongs to same user
         if measurement.user_id != goal.user_id:
             raise ValueError("Measurement does not belong to goal's user")
 
-        # Determine week number and validate timing
-        week_number = len(goal.progress_entries) + 1
+        # Check for same-day entry (upsert logic)
+        existing_entry = None
+        entry_date = entry_time.date()
+        for entry in goal.progress_entries:
+            if entry.logged_at.date() == entry_date:
+                existing_entry = entry
+                break
 
-        # Get most recent measurement date
-        if goal.progress_entries:
-            last_entry = max(
-                goal.progress_entries,
-                key=lambda e: e.logged_at
-            )
+        # Filter out the existing entry for calculations
+        other_entries = [
+            e for e in goal.progress_entries
+            if existing_entry is None or e.id != existing_entry.id
+        ]
+
+        # Determine week number
+        week_number = len(other_entries) + 1
+
+        # Get most recent measurement date (excluding same-day entry)
+        if other_entries:
+            last_entry = max(other_entries, key=lambda e: e.logged_at)
             last_measurement_result = await self.db.execute(
                 select(BodyMeasurement).where(
                     BodyMeasurement.id == last_entry.measurement_id
                 )
             )
             last_measurement = last_measurement_result.scalar_one()
-
-            days_since_last = (
-                measurement.measured_at - last_measurement.measured_at
-            ).days
-
-            if days_since_last < 7:
-                raise ValueError(
-                    f"Must wait at least 7 days between progress entries "
-                    f"(only {days_since_last} days since last entry)"
-                )
 
             # Calculate changes from previous entry
             body_fat_change = (
@@ -174,17 +185,6 @@ class ProgressService:
             weight_change = measurement.weight_kg - last_measurement.weight_kg
         else:
             # First progress entry - compare to initial measurement
-            days_since_start = (
-                measurement.measured_at -
-                goal.initial_measurement.measured_at
-            ).days
-
-            if days_since_start < 7:
-                raise ValueError(
-                    f"Must wait at least 7 days after goal start "
-                    f"(only {days_since_start} days since goal started)"
-                )
-
             body_fat_change = (
                 measurement.calculated_body_fat_percentage -
                 goal.initial_measurement.calculated_body_fat_percentage
@@ -215,11 +215,8 @@ class ProgressService:
                 )
 
             # Check rate (only if we have previous measurement)
-            if goal.progress_entries:
-                last_entry = max(
-                    goal.progress_entries,
-                    key=lambda e: e.logged_at
-                )
+            if other_entries:
+                last_entry = max(other_entries, key=lambda e: e.logged_at)
                 last_measurement_result = await self.db.execute(
                     select(BodyMeasurement).where(
                         BodyMeasurement.id == last_entry.measurement_id
@@ -237,21 +234,45 @@ class ProgressService:
                     weeks=max(1, weeks_between)
                 )
 
-        # Create progress entry
-        progress_entry = ProgressEntry(
-            goal_id=goal_id,
-            measurement_id=measurement_id,
-            week_number=week_number,
-            body_fat_percentage=measurement.calculated_body_fat_percentage,
-            weight_kg=measurement.weight_kg,
-            body_fat_change=body_fat_change,
-            weight_change_kg=weight_change,
-            is_on_track=is_on_track,
-            notes=notes,
-            logged_at=datetime.utcnow()
-        )
+        if existing_entry:
+            # Upsert: overwrite existing same-day entry
+            # Delete old measurement if it's different
+            old_measurement_id = existing_entry.measurement_id
+            existing_entry.measurement_id = measurement_id
+            existing_entry.body_fat_percentage = measurement.calculated_body_fat_percentage
+            existing_entry.weight_kg = measurement.weight_kg
+            existing_entry.body_fat_change = body_fat_change
+            existing_entry.weight_change_kg = weight_change
+            existing_entry.is_on_track = is_on_track
+            existing_entry.notes = notes
+            existing_entry.logged_at = entry_time
+            progress_entry = existing_entry
 
-        self.db.add(progress_entry)
+            # Clean up old measurement if it changed
+            if old_measurement_id != measurement_id:
+                old_measurement_result = await self.db.execute(
+                    select(BodyMeasurement).where(
+                        BodyMeasurement.id == old_measurement_id
+                    )
+                )
+                old_measurement = old_measurement_result.scalar_one_or_none()
+                if old_measurement:
+                    await self.db.delete(old_measurement)
+        else:
+            # Create new progress entry
+            progress_entry = ProgressEntry(
+                goal_id=goal_id,
+                measurement_id=measurement_id,
+                week_number=week_number,
+                body_fat_percentage=measurement.calculated_body_fat_percentage,
+                weight_kg=measurement.weight_kg,
+                body_fat_change=body_fat_change,
+                weight_change_kg=weight_change,
+                is_on_track=is_on_track,
+                notes=notes,
+                logged_at=entry_time
+            )
+            self.db.add(progress_entry)
 
         # Complete goal if ceiling reached
         if should_complete:
@@ -267,6 +288,9 @@ class ProgressService:
         # Not stored in database (can be recalculated from data)
         progress_entry.ceiling_warning = ceiling_warning  # type: ignore
         progress_entry.rate_warning = rate_warning  # type: ignore
+        
+        # Eagerly attach measurement to prevent MissingGreenlet lazy-loading error in schemas
+        progress_entry.measurement = measurement
 
         return progress_entry
 

@@ -1,7 +1,7 @@
 """
 BodyMeasurement Pydantic schemas for Body Recomp Backend.
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Optional
 from uuid import UUID
@@ -9,6 +9,7 @@ from uuid import UUID
 from pydantic import (
     BaseModel,
     Field,
+    field_validator,
     model_validator,
 )
 
@@ -106,6 +107,16 @@ class BodyMeasurementCreate(BaseModel):
         description="When the measurement was taken",
     )
 
+    @field_validator("measured_at", mode="before")
+    @classmethod
+    def strip_timezone(cls, v: object) -> object:
+        if isinstance(v, str):
+            dt = datetime.fromisoformat(v.replace("Z", "+00:00"))
+            return dt.astimezone(timezone.utc).replace(tzinfo=None)
+        if isinstance(v, datetime) and v.tzinfo is not None:
+            return v.astimezone(timezone.utc).replace(tzinfo=None)
+        return v
+
     @model_validator(mode="after")
     def validate_required_fields_by_method(self) -> "BodyMeasurementCreate":
         """
@@ -169,6 +180,27 @@ class BodyMeasurementCreate(BaseModel):
                 )
         
         return self
+
+
+class BodyMeasurementUpdate(BaseModel):
+    """Schema for updating an existing body measurement.
+
+    All fields are optional — only provided fields are updated.
+    Body fat is recalculated server-side after update.
+    """
+
+    weight_kg: Optional[Decimal] = Field(None, ge=30.0, le=300.0)
+    waist_cm: Optional[Decimal] = Field(None, ge=10.0, le=200.0)
+    neck_cm: Optional[Decimal] = Field(None, ge=10.0, le=200.0)
+    hip_cm: Optional[Decimal] = Field(None, ge=10.0, le=200.0)
+    chest_mm: Optional[Decimal] = Field(None, ge=1.0, le=70.0)
+    abdomen_mm: Optional[Decimal] = Field(None, ge=1.0, le=70.0)
+    thigh_mm: Optional[Decimal] = Field(None, ge=1.0, le=70.0)
+    tricep_mm: Optional[Decimal] = Field(None, ge=1.0, le=70.0)
+    suprailiac_mm: Optional[Decimal] = Field(None, ge=1.0, le=70.0)
+    midaxillary_mm: Optional[Decimal] = Field(None, ge=1.0, le=70.0)
+    subscapular_mm: Optional[Decimal] = Field(None, ge=1.0, le=70.0)
+    notes: Optional[str] = None
 
 
 class BodyMeasurementResponse(BaseModel):

@@ -14,6 +14,7 @@ from src.services.progress_service import ProgressService
 from src.services.goal_service import GoalService
 from src.schemas.progress import (
     ProgressEntryCreate,
+    ProgressEntryUpdate,
     ProgressEntryResponse,
     TrendsResponse
 )
@@ -75,7 +76,8 @@ async def create_progress_entry(
         progress_entry = await progress_service.log_progress(
             goal_id=goal_id,
             measurement_id=progress_data.measurement_id,
-            notes=progress_data.notes
+            notes=progress_data.notes,
+            logged_at=progress_data.logged_at
         )
         
         # Check if goal is now completed
@@ -141,9 +143,12 @@ async def get_progress_history(
             detail="Goal not found"
         )
     
+    from sqlalchemy.orm import selectinload
+    
     # Get all progress entries ordered by week number
     result = await db.execute(
         select(ProgressEntry)
+        .options(selectinload(ProgressEntry.measurement))
         .where(ProgressEntry.goal_id == goal_id)
         .order_by(ProgressEntry.week_number)
     )
@@ -214,3 +219,81 @@ async def get_progress_trends(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=str(e)
             )
+
+
+@router.patch(
+    "/{goal_id}/progress/{entry_id}",
+    response_model=ProgressEntryResponse,
+    summary="Update progress entry",
+    description="Update the notes on an existing progress entry."
+)
+async def update_progress_entry(
+    goal_id: UUID,
+    entry_id: UUID,
+    update_data: ProgressEntryUpdate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+) -> ProgressEntryResponse:
+    """
+    Update an existing progress entry.
+
+    Only the notes field can be updated. Body measurements and derived
+    values (body fat %, weight, changes) are immutable once logged.
+
+    Args:
+        goal_id: Goal the entry belongs to
+        entry_id: Progress entry to update
+        update_data: Fields to update
+        db: Database session
+
+    Returns:
+        Updated progress entry
+
+    Raises:
+        404: Goal or entry not found
+    """
+    from sqlalchemy import select
+    from src.models.goal import Goal
+    from src.models.progress import ProgressEntry
+
+    # Verify goal exists and belongs to current user
+    goal_result = await db.execute(
+        select(Goal).where(Goal.id == goal_id)
+    )
+    goal = goal_result.scalar_one_or_none()
+
+    if not goal or goal.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Goal not found"
+        )
+
+    from sqlalchemy.orm import selectinload
+
+    # Fetch the progress entry
+    entry_result = await db.execute(
+        select(ProgressEntry)
+        .options(selectinload(ProgressEntry.measurement))
+        .where(
+            ProgressEntry.id == entry_id,
+            ProgressEntry.goal_id == goal_id
+        )
+    )
+    entry = entry_result.scalar_one_or_none()
+
+    if not entry:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Progress entry not found"
+        )
+
+    # Apply updates
+    update_fields = update_data.model_dump(exclude_unset=True)
+    for field, value in update_fields.items():
+        setattr(entry, field, value)
+
+    await db.commit()
+    await db.refresh(entry)
+
+    return ProgressEntryResponse.model_validate(entry)
+

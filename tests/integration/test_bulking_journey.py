@@ -68,7 +68,7 @@ class TestBulkingGoalCreation:
         measurement_data = {
             "weight_kg": 72.0,
             "calculation_method": "navy",
-            "waist_cm": 75.0,  # Lower waist for lower BF%
+            "waist_cm": 83.0,  # Ensure BF is <= 15%
             "neck_cm": 40.0,  # Higher neck for lower BF%
             "measured_at": datetime.now().isoformat(),
         }
@@ -185,7 +185,7 @@ class TestBulkingGoalCreation:
         initial_measurement_data = {
             "weight_kg": 70.0,
             "calculation_method": "navy",
-            "waist_cm": 74.0,
+            "waist_cm": 81.7,
             "neck_cm": 40.0,
             "measured_at": datetime.now().isoformat(),
         }
@@ -219,7 +219,7 @@ class TestBulkingGoalCreation:
         week1_measurement = {
             "weight_kg": 71.0,  # +1kg
             "calculation_method": "navy",
-            "waist_cm": 75.0,  # Slight increase
+            "waist_cm": 83.0,  # Slight increase
             "neck_cm": 40.0,
             "measured_at": (
                 datetime.now() + timedelta(days=7)
@@ -257,7 +257,7 @@ class TestBulkingGoalCreation:
         week2_measurement = {
             "weight_kg": 72.5,
             "calculation_method": "navy",
-            "waist_cm": 77.0,
+            "waist_cm": 85.0,
             "neck_cm": 40.0,
             "measured_at": (
                 datetime.now() + timedelta(days=14)
@@ -288,7 +288,7 @@ class TestBulkingGoalCreation:
         week3_measurement = {
             "weight_kg": 74.5,
             "calculation_method": "navy",
-            "waist_cm": 81.0,  # Higher waist
+            "waist_cm": 87.5,  # Higher waist
             "neck_cm": 40.0,
             "measured_at": (
                 datetime.now() + timedelta(days=21)
@@ -344,7 +344,7 @@ class TestBulkingGoalCreation:
         week4_measurement = {
             "weight_kg": 76.0,
             "calculation_method": "navy",
-            "waist_cm": 85.0,  # Even higher waist
+            "waist_cm": 89.0,  # Even higher waist
             "neck_cm": 40.0,
             "measured_at": (
                 datetime.now() + timedelta(days=28)

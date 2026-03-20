@@ -148,7 +148,7 @@ class TestTrainingPlanContracts:
         measurement_data = {
             "weight_kg": 70.0,
             "calculation_method": "navy",
-            "waist_cm": 74.0,
+            "waist_cm": 81.7,
             "neck_cm": 40.0,
             "measured_at": datetime.now().isoformat(),
         }

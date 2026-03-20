@@ -227,7 +227,7 @@ class TestGoalCreation:
         measurement_data = {
             "weight_kg": 75.0,
             "calculation_method": "navy",
-            "waist_cm": 75.0,  # Lower waist for lower BF%
+            "waist_cm": 83.4,  # Adjusted to maintain ~14% BF with fixed calculation
             "neck_cm": 40.0,  # Higher neck for lower BF%
             "measured_at": datetime.now().isoformat(),
         }

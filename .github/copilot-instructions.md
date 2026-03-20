@@ -3,6 +3,8 @@
 Auto-generated from all feature plans. Last updated: 2025-10-23
 
 ## Active Technologies
+- TypeScript 5.3.3 + Next.js 14.1.0, React 18.2.0, React DOM 18.2.0, TailwindCSS 3.4.1, Capacitor (002-app-frontend)
+- Backend API existente para dados de negocio + armazenamento local seguro para estado de sessao e preferencias de dispositivo (002-app-frontend)
 
 - Python 3.11+ + FastAPI 0.104+, SQLAlchemy 2.0+, Pydantic 2.0+, Alembic (migrations) (001-body-recomp-goals)
 
@@ -22,6 +24,7 @@ cd src [ONLY COMMANDS FOR ACTIVE TECHNOLOGIES][ONLY COMMANDS FOR ACTIVE TECHNOLO
 Python 3.11+: Follow standard conventions
 
 ## Recent Changes
+- 002-app-frontend: Added TypeScript 5.3.3 + Next.js 14.1.0, React 18.2.0, React DOM 18.2.0, TailwindCSS 3.4.1, Capacitor
 
 - 001-body-recomp-goals: Added Python 3.11+ + FastAPI 0.104+, SQLAlchemy 2.0+, Pydantic 2.0+, Alembic (migrations)
 

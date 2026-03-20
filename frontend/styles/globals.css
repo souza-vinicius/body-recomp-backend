@@ -1,0 +1,130 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #fafafa;
+  --foreground: #171717;
+  --primary: #f97316;
+  --primary-dark: #ea580c;
+  --primary-light: #ffedd5;
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+  --border: #e5e5e5;
+  --border-subtle: #f0f0f0;
+  --text-primary: #171717;
+  --text-secondary: #525252;
+  --text-muted: #a3a3a3;
+  color-scheme: light;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: none;
+}
+
+/* ── Card System ── */
+@layer components {
+  .card {
+    @apply bg-white rounded-2xl shadow-card border border-surface-100 transition-shadow duration-200;
+  }
+  .card:hover {
+    @apply shadow-card-hover;
+  }
+  .card-flat {
+    @apply bg-white rounded-2xl border border-surface-200;
+  }
+
+  /* Gradient backgrounds */
+  .bg-gradient-primary {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  }
+  .bg-gradient-warm {
+    background: linear-gradient(135deg, #fb923c 0%, #f97316 50%, #ea580c 100%);
+  }
+  .bg-gradient-dark {
+    background: linear-gradient(135deg, #171717 0%, #262626 100%);
+  }
+  .bg-gradient-subtle {
+    background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+  }
+
+  /* Section header bar */
+  .section-header {
+    @apply flex items-center gap-2 pb-3 mb-4 border-b border-surface-200;
+  }
+  .section-header h3 {
+    @apply text-base font-bold text-surface-900;
+  }
+  .section-header .icon {
+    @apply w-5 h-5 text-primary-500;
+  }
+
+  /* Stat card */
+  .stat-card {
+    @apply bg-white p-4 rounded-xl border border-surface-100 shadow-card;
+  }
+  .stat-label {
+    @apply text-xs font-semibold uppercase tracking-wider text-surface-400;
+  }
+  .stat-value {
+    @apply text-xl font-black text-surface-900 mt-1;
+  }
+
+  /* Page header */
+  .page-header {
+    @apply mb-6;
+  }
+  .page-title {
+    @apply text-2xl font-black text-surface-900 tracking-tight;
+  }
+  .page-subtitle {
+    @apply text-sm text-surface-500 mt-1;
+  }
+}
+
+/* ── Scrollbar Styling ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d4d4d4;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a3a3a3;
+}
+
+/* ── Focus Styles ── */
+*:focus-visible {
+  outline: 2px solid #f97316;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Nav Active Indicator ── */
+.nav-active-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #f97316;
+  margin-top: 2px;
+}
+
+/* ── Safe area padding for Capacitor ── */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

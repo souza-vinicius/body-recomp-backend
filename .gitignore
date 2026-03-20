@@ -90,3 +90,27 @@ alembic/versions/*.pyc
 
 #Ignore insiders AI rules
 .github/instructions/codacy.instructions.md
+
+#Ignore agent rules
+.agent/
+.claude/
+.gemini/
+.kilocode/
+.opencode/
+.github/agents/
+.github/prompts/
+.github/skills/
+.github/scripts/
+.github/.shared/
+
+#Ignore other agents
+.anthropic/
+.mistral/
+.openai/
+.perplexity/
+.togetherai/
+
+frontend/.next/
+.next/
+
+node_modules/

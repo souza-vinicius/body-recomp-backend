@@ -1,0 +1,43 @@
+import React from 'react';
+import { Flame, Beef, Wheat, Droplets } from 'lucide-react';
+
+interface MacroTargetsProps {
+  dietPlan: any;
+}
+
+export function MacroTargets({ dietPlan }: MacroTargetsProps) {
+  if (!dietPlan) return null;
+
+  const macros = [
+    { label: 'Calories', value: dietPlan.daily_calorie_target, unit: 'kcal', icon: Flame, bg: 'bg-surface-900', iconColor: 'text-primary-400', textColor: 'text-white' },
+    { label: 'Protein', value: dietPlan.protein_grams, unit: 'g', icon: Beef, bg: 'bg-red-50', iconColor: 'text-red-500', textColor: 'text-red-900' },
+    { label: 'Carbs', value: dietPlan.carbs_grams, unit: 'g', icon: Wheat, bg: 'bg-amber-50', iconColor: 'text-amber-500', textColor: 'text-amber-900' },
+    { label: 'Fats', value: dietPlan.fat_grams, unit: 'g', icon: Droplets, bg: 'bg-blue-50', iconColor: 'text-blue-500', textColor: 'text-blue-900' },
+  ];
+
+  return (
+    <div className="card p-6">
+      <h3 className="text-xs font-bold text-surface-400 uppercase tracking-widest mb-4">Daily Targets</h3>
+      
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {macros.map(macro => {
+          const Icon = macro.icon;
+          return (
+            <div key={macro.label} className={`p-4 rounded-xl text-center ${macro.bg}`}>
+              <Icon size={20} className={`${macro.iconColor} mx-auto mb-2`} />
+              <span className={`text-xl font-black block ${macro.textColor}`}>
+                {macro.value || '--'}
+              </span>
+              <span className={`text-xs font-medium block mt-0.5 opacity-60 ${macro.textColor}`}>
+                {macro.unit}
+              </span>
+              <span className={`text-[10px] font-bold uppercase tracking-wider block mt-1 opacity-40 ${macro.textColor}`}>
+                {macro.label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,303 @@
+openapi: 3.0.3
+info:
+  title: Frontend Integration Contract - Body Recomp App
+  version: 0.1.0
+  description: >-
+    Contract focused on the backend resources required by the new frontend
+    experience for onboarding, dashboard, progress tracking, and plan viewing.
+servers:
+  - url: http://localhost:8000/api/v1
+paths:
+  /users:
+    post:
+      summary: Register a new end user from the frontend onboarding flow
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+      responses:
+        '201':
+          description: User registered successfully
+        '422':
+          description: Validation error
+  /auth/login:
+    post:
+      summary: Authenticate user credentials from the frontend sign-in form
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authenticated successfully
+        '401':
+          description: Invalid credentials
+  /auth/refresh:
+    post:
+      summary: Refresh the authenticated session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: Session refreshed
+        '401':
+          description: Refresh token invalid or expired
+  /users/me:
+    get:
+      summary: Load the current authenticated user profile for shell initialization
+      responses:
+        '200':
+          description: Current user profile
+        '401':
+          description: Authentication required
+  /measurements:
+    post:
+      summary: Create an initial or weekly body measurement entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeasurementRequest'
+      responses:
+        '201':
+          description: Measurement created successfully
+        '400':
+          description: Domain validation error
+        '422':
+          description: Input validation error
+  /goals:
+    get:
+      summary: Retrieve a list of all goals for the authenticated user, primarily to resolve the active goal ID.
+      responses:
+        '200':
+          description: A list of goals.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GoalRequest'
+    post:
+      summary: Create a cutting or bulking goal after the initial measurement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoalRequest'
+      responses:
+        '201':
+          description: Goal created successfully
+        '400':
+          description: Goal validation error
+        '403':
+          description: Existing active goal conflict
+  /goals/{goalId}:
+    get:
+      summary: Load the active goal details for dashboard and detail screens
+      parameters:
+        - in: path
+          name: goalId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Goal details loaded
+        '404':
+          description: Goal not found or not accessible
+  /goals/{goalId}/progress:
+    post:
+      summary: Register a progress entry associated with a measurement
+      parameters:
+        - in: path
+          name: goalId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProgressRequest'
+      responses:
+        '201':
+          description: Progress entry registered
+        '400':
+          description: Domain rule prevented the registration
+        '404':
+          description: Goal or measurement not found
+    get:
+      summary: Load chronological progress history for the active goal
+      parameters:
+        - in: path
+          name: goalId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Progress history returned
+        '404':
+          description: Goal not found
+  /goals/{goalId}/trends:
+    get:
+      summary: Load trend and summary analytics for the active goal
+      parameters:
+        - in: path
+          name: goalId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Trend summary returned
+        '404':
+          description: Goal not found
+  /goals/{goalId}/training-plan:
+    get:
+      summary: Load the training plan associated with the active goal
+      parameters:
+        - in: path
+          name: goalId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Training plan returned
+        '404':
+          description: Plan not found
+  /goals/{goalId}/diet-plan:
+    get:
+      summary: Load the diet plan associated with the active goal
+      parameters:
+        - in: path
+          name: goalId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Diet plan returned
+        '404':
+          description: Plan not found
+components:
+  schemas:
+    UserRegistration:
+      type: object
+      required:
+        - email
+        - password
+        - full_name
+        - date_of_birth
+        - gender
+        - height_cm
+        - preferred_calculation_method
+        - activity_level
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        full_name:
+          type: string
+        date_of_birth:
+          type: string
+          format: date
+        gender:
+          type: string
+        height_cm:
+          type: number
+        preferred_calculation_method:
+          type: string
+        activity_level:
+          type: string
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    RefreshRequest:
+      type: object
+      required: [refresh_token]
+      properties:
+        refresh_token:
+          type: string
+    MeasurementRequest:
+      type: object
+      required:
+        - weight_kg
+        - calculation_method
+        - measured_at
+      properties:
+        weight_kg:
+          type: number
+        calculation_method:
+          type: string
+        waist_cm:
+          type: number
+        neck_cm:
+          type: number
+        hip_cm:
+          type: number
+        chest_mm:
+          type: number
+        abdomen_mm:
+          type: number
+        thigh_mm:
+          type: number
+        tricep_mm:
+          type: number
+        suprailiac_mm:
+          type: number
+        midaxillary_mm:
+          type: number
+        subscapular_mm:
+          type: number
+        measured_at:
+          type: string
+          format: date-time
+    GoalRequest:
+      type: object
+      required:
+        - goal_type
+        - initial_measurement_id
+      properties:
+        goal_type:
+          type: string
+        initial_measurement_id:
+          type: string
+          format: uuid
+        target_body_fat_percentage:
+          type: number
+        ceiling_body_fat_percentage:
+          type: number
+    ProgressRequest:
+      type: object
+      required: [measurement_id]
+      properties:
+        measurement_id:
+          type: string
+          format: uuid
+        notes:
+          type: string
