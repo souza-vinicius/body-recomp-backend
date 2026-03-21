@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { TrendingUp, Plus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { getProgressHistory } from '@/lib/api/progress';
 import { getTrends, getActiveGoal } from '@/lib/api/goals';
 import { sessionStorage } from '@/lib/auth/session-storage';
@@ -14,6 +15,9 @@ import { BodyFatTrendChart } from '@/components/charts/body-fat-trend-chart';
 import { ProgressHistoryList } from '@/components/domain/history/progress-history-list';
 
 export default function ProgressPage() {
+  const t = useTranslations('Progress');
+  const td = useTranslations('Dashboard.NoGoalPanel');
+  
   const [entries, setEntries] = useState<any[]>([]);
   const [trends, setTrends] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -57,15 +61,15 @@ export default function ProgressPage() {
         setEntries(sortedEntries);
         setTrends(trendsRes);
       } catch (err: any) {
-        setError(err.message || 'Failed to load progress');
+        setError(err.message || t('error_loading'));
       } finally {
         setLoading(false);
       }
     }
     load();
-  }, []);
+  }, [t]);
 
-  if (loading) return <LoadingState message="Loading progress..." />;
+  if (loading) return <LoadingState message={t('loading')} />;
   if (error) return <div className="text-red-500 p-4 rounded-xl bg-red-50 text-sm">{error}</div>;
 
   return (
@@ -74,10 +78,10 @@ export default function ProgressPage() {
         <div className="page-header mb-0">
           <div className="flex items-center gap-2">
             <TrendingUp size={22} className="text-primary-500" />
-            <h1 className="page-title">Progress</h1>
+            <h1 className="page-title">{t('title')}</h1>
           </div>
           <p className="page-subtitle mt-1">
-            Track your body recomposition journey.
+            {t('subtitle')}
           </p>
         </div>
         {hasGoal && (
@@ -86,35 +90,35 @@ export default function ProgressPage() {
             className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-primary text-white text-sm font-semibold rounded-xl shadow-card hover:shadow-glow-orange transition-all duration-200 active:scale-[0.98]"
           >
             <Plus size={16} />
-            Log
+            {t('log_button')}
           </Link>
         )}
       </div>
 
       {!hasGoal ? (
         <EmptyState
-          title="No Active Goal"
-          description="Set up a goal first to start tracking your progress."
+          title={td('title')}
+          description={td('description')}
           action={
             <Link
               href="/setup"
               className="inline-flex items-center px-5 py-2.5 bg-gradient-primary text-white text-sm font-semibold rounded-xl hover:shadow-glow-orange transition-all duration-200 active:scale-[0.98]"
             >
-              Set Up Goal
+              {td('button')}
             </Link>
           }
         />
       ) : entries.length === 0 ? (
         <EmptyState
-          title="No Progress Yet"
-          description="Log your first weekly measurement to start tracking your journey."
+          title={t('no_progress_title')}
+          description={t('no_progress_description')}
           action={
             <Link
               href="/progress/new"
               className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-primary text-white text-sm font-semibold rounded-xl hover:shadow-glow-orange transition-all duration-200 active:scale-[0.98]"
             >
               <Plus size={16} />
-              Log First Entry
+              {t('log_first_entry')}
             </Link>
           }
         />
@@ -131,3 +135,4 @@ export default function ProgressPage() {
     </div>
   );
 }
+

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Apple, CheckCircle2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface DietPlanPanelProps {
   dietPlan: any;
@@ -67,8 +68,11 @@ const parseGuidelines = (text: string) => {
 };
 
 export function DietPlanPanel({ dietPlan }: DietPlanPanelProps) {
+  const t = useTranslations('Plans.DietPlan');
+  const td = useTranslations('Plans.DailyTargets');
+
   if (!dietPlan) {
-    return <div className="card p-6 text-surface-400 text-sm">No diet plan available.</div>;
+    return <div className="card p-6 text-surface-400 text-sm">{t('no_plan')}</div>;
   }
 
   return (
@@ -78,7 +82,7 @@ export function DietPlanPanel({ dietPlan }: DietPlanPanelProps) {
           <div className="w-8 h-8 rounded-lg bg-surface-800 flex items-center justify-center">
             <Apple size={16} className="text-green-400" />
           </div>
-          <h3 className="text-sm font-bold text-white tracking-wide uppercase">Diet Plan</h3>
+          <h3 className="text-sm font-bold text-white tracking-wide uppercase">{t('title')}</h3>
         </div>
       </div>
       
@@ -86,10 +90,10 @@ export function DietPlanPanel({ dietPlan }: DietPlanPanelProps) {
         {/* Macro Overview */}
         <div className="p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: 'Calories', value: `${dietPlan.daily_calorie_target}`, unit: 'kcal' },
-            { label: 'Protein', value: `${dietPlan.protein_grams}`, unit: 'g' },
-            { label: 'Carbs', value: `${dietPlan.carbs_grams}`, unit: 'g' },
-            { label: 'Fat', value: `${dietPlan.fat_grams}`, unit: 'g' },
+            { label: td('calories'), value: `${dietPlan.daily_calorie_target}`, unit: 'kcal' },
+            { label: td('protein'), value: `${dietPlan.protein_grams}`, unit: 'g' },
+            { label: td('carbs'), value: `${dietPlan.carbs_grams}`, unit: 'g' },
+            { label: td('fats'), value: `${dietPlan.fat_grams}`, unit: 'g' },
           ].map(row => (
             <div key={row.label} className="p-4 bg-surface-50 rounded-xl border border-surface-100 text-center flex flex-col items-center justify-center">
               <span className="text-xs font-semibold text-surface-400 uppercase tracking-widest block mb-1">{row.label}</span>
@@ -113,3 +117,4 @@ export function DietPlanPanel({ dietPlan }: DietPlanPanelProps) {
     </div>
   );
 }
+

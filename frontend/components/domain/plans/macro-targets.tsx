@@ -1,23 +1,26 @@
 import React from 'react';
 import { Flame, Beef, Wheat, Droplets } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface MacroTargetsProps {
   dietPlan: any;
 }
 
 export function MacroTargets({ dietPlan }: MacroTargetsProps) {
+  const t = useTranslations('Plans.DailyTargets');
+  
   if (!dietPlan) return null;
 
   const macros = [
-    { label: 'Calories', value: dietPlan.daily_calorie_target, unit: 'kcal', icon: Flame, bg: 'bg-surface-900', iconColor: 'text-primary-400', textColor: 'text-white' },
-    { label: 'Protein', value: dietPlan.protein_grams, unit: 'g', icon: Beef, bg: 'bg-red-50', iconColor: 'text-red-500', textColor: 'text-red-900' },
-    { label: 'Carbs', value: dietPlan.carbs_grams, unit: 'g', icon: Wheat, bg: 'bg-amber-50', iconColor: 'text-amber-500', textColor: 'text-amber-900' },
-    { label: 'Fats', value: dietPlan.fat_grams, unit: 'g', icon: Droplets, bg: 'bg-blue-50', iconColor: 'text-blue-500', textColor: 'text-blue-900' },
+    { label: t('calories'), value: dietPlan.daily_calorie_target, unit: t('calories_unit'), icon: Flame, bg: 'bg-surface-900', iconColor: 'text-primary-400', textColor: 'text-white' },
+    { label: t('protein'), value: dietPlan.protein_grams, unit: t('grams_unit'), icon: Beef, bg: 'bg-red-50', iconColor: 'text-red-500', textColor: 'text-red-900' },
+    { label: t('carbs'), value: dietPlan.carbs_grams, unit: t('grams_unit'), icon: Wheat, bg: 'bg-amber-50', iconColor: 'text-amber-500', textColor: 'text-amber-900' },
+    { label: t('fats'), value: dietPlan.fat_grams, unit: t('grams_unit'), icon: Droplets, bg: 'bg-blue-50', iconColor: 'text-blue-500', textColor: 'text-blue-900' },
   ];
 
   return (
     <div className="card p-6">
-      <h3 className="text-xs font-bold text-surface-400 uppercase tracking-widest mb-4">Daily Targets</h3>
+      <h3 className="text-xs font-bold text-surface-400 uppercase tracking-widest mb-4">{t('title')}</h3>
       
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {macros.map(macro => {
@@ -41,3 +44,4 @@ export function MacroTargets({ dietPlan }: MacroTargetsProps) {
     </div>
   );
 }
+

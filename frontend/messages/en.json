@@ -1,0 +1,300 @@
+{
+  "Index": {
+    "title": "Welcome to Body Recomp!"
+  },
+  "AppNav": {
+    "dashboard": "Dashboard",
+    "progress": "Progress",
+    "history": "History",
+    "plans": "Plans"
+  },
+  "Dashboard": {
+    "title": "Dashboard",
+    "greeting_morning": "Good morning",
+    "greeting_afternoon": "Good afternoon",
+    "greeting_evening": "Good evening",
+    "loading": "Loading dashboard...",
+    "error_loading": "Failed to load dashboard",
+    "QuickActions": {
+      "title": "Quick Actions",
+      "log_progress": "Log Progress",
+      "view_history": "View History",
+      "my_plans": "My Plans"
+    },
+    "NoGoalPanel": {
+      "title": "No Active Goal",
+      "description": "You don't have an active body recomposition goal. Set one up to start tracking your progress.",
+      "button": "Set Up Goal"
+    },
+    "KpiCards": {
+      "est_weeks": "Est. Weeks",
+      "pace": "Pace",
+      "trend_improving": "Improving",
+      "trend_stable": "Stable",
+      "trend_worsening": "Worsening",
+      "trend_fast": "Fast",
+      "weeks_unit": "weeks"
+    },
+    "GoalSummaryCard": {
+      "cutting_phase": "Cutting Phase",
+      "bulking_phase": "Bulking Phase",
+      "body_fat": "Body Fat",
+      "target": "Target",
+      "ceiling": "Ceiling",
+      "status": "Status",
+      "active": "Active",
+      "progress_label": "Progress"
+    }
+  },
+  "Progress": {
+    "title": "Progress",
+    "subtitle": "Track your body recomposition journey.",
+    "loading": "Loading progress...",
+    "error_loading": "Failed to load progress",
+    "log_button": "Log",
+    "no_progress_title": "No Progress Yet",
+    "no_progress_description": "Log your first weekly measurement to start tracking your journey.",
+    "log_first_entry": "Log First Entry",
+    "RecentLogs": {
+      "title": "Recent Logs",
+      "no_history": "No history records found.",
+      "fat_mass_label": "Fat Mass",
+      "lean_mass_label": "Lean Mass",
+      "fat": "Fat",
+      "lean": "Lean",
+      "edit_entry": "Edit entry"
+    },
+    "EditModal": {
+      "title": "Edit Entry",
+      "week": "Week",
+      "weight": "Weight",
+      "body_fat": "Body Fat",
+      "entry_date": "Entry Date",
+      "weight_label": "Weight (kg)",
+      "circumferences_title": "Circumference Measurements",
+      "circumferences_hint": "Leave blank to keep current values. Body fat will be recalculated.",
+      "waist_label": "Waist (cm)",
+      "neck_label": "Neck (cm)",
+      "hip_label": "Hip (cm) - Female only",
+      "notes_label": "Notes",
+      "notes_placeholder": "How did you feel this week?",
+      "cancel": "Cancel",
+      "save": "Save",
+      "error_update": "Failed to update"
+    },
+    "New": {
+      "title": "Log Weekly Progress",
+      "subtitle": "Consistency is the key to body recomposition.",
+      "loading": "Loading...",
+      "error_no_goal": "No active goal found. Please set a goal first.",
+      "error_submit_failed": "Failed to submit progress. Please try again."
+    },
+    "Form": {
+      "Sections": {
+        "date_title": "Entry Date",
+        "date_description": "If an entry already exists for this date, it will be replaced.",
+        "measurements_title": "Body Measurements",
+        "lifestyle_title": "Lifestyle & Habits"
+      },
+      "Fields": {
+        "weight_label": "Weight (kg)",
+        "method_label": "Body Fat Measurement Method",
+        "neck_label": "Neck (cm)",
+        "waist_label": "Waist (cm)",
+        "hip_label": "Hip (cm) – Optional",
+        "chest_label": "Chest (mm)",
+        "abdomen_label": "Abdomen (mm)",
+        "thigh_label": "Thigh (mm)",
+        "tricep_label": "Tricep (mm)",
+        "suprailiac_label": "Suprailiac (mm)",
+        "midaxillary_label": "Midaxillary (mm)",
+        "subscapular_label": "Subscapular (mm)",
+        "energy_label": "Energy Level (1-10)",
+        "stress_label": "Stress Level (1-10)",
+        "sleep_label": "Sleep Quality (1-10)",
+        "adherence_label": "Diet Adherence %",
+        "notes_label": "Notes (Optional)",
+        "notes_placeholder": "How did you feel this week?"
+      },
+      "Methods": {
+        "navy": "US Navy Tape",
+        "3_site": "Skinfold (3-site)",
+        "7_site": "Skinfold (7-site)",
+        "skinfold_hint": "Male: chest, abdomen, thigh. Female: tricep, suprailiac, thigh."
+      },
+      "submit_button": "Log Progress"
+    }
+  },
+  "History": {
+    "title": "Your Progress",
+    "subtitle": "Review your journey and trends.",
+    "loading": "Loading history...",
+    "error_loading": "Failed to load history",
+    "no_goal_found": "No active goal found.",
+    "InsufficientData": {
+      "title": "Keep Tracking!",
+      "description": "We need at least two measurements to calculate your trends and progress speed. Remember to log your numbers weekly."
+    },
+    "TrendCards": {
+      "pace": "Pace",
+      "calculating": "Calculating...",
+      "avg_weekly": "Avg Weekly"
+    }
+  },
+  "Plans": {
+    "title": "Your Recomp Plan",
+    "subtitle": "AI-generated recommendations based on your current goal.",
+    "loading": "Loading your plan...",
+    "error_loading": "Failed to load plans",
+    "no_goal_found": "No active goal found. Please set a goal first.",
+    "unavailable_title": "Plan Unavailable",
+    "unavailable_description": "Your plan is still being generated or is unavailable.",
+    "check_again": "Check Again",
+    "DailyTargets": {
+      "title": "Daily Targets",
+      "calories": "Calories",
+      "protein": "Protein",
+      "carbs": "Carbs",
+      "fats": "Fats",
+      "calories_unit": "kcal",
+      "grams_unit": "g"
+    },
+    "TrainingPlan": {
+      "title": "Training Plan",
+      "no_plan": "No training plan available.",
+      "frequency": "Frequency",
+      "per_week": "/ week",
+      "strength_training": "Strength Training",
+      "progression": "Progression",
+      "notes": "Notes",
+      "cardio": "Cardio",
+      "intensity": "Intensity",
+      "examples": "Examples",
+      "recovery": "Recovery",
+      "rest_days": "Rest Days",
+      "sleep_target": "Sleep Target",
+      "hours": "hours",
+      "sets": "Sets",
+      "reps": "Reps",
+      "rest": "Rest",
+      "plan_notes": "Plan Notes"
+    },
+    "DietPlan": {
+      "title": "Diet Plan",
+      "no_plan": "No diet plan available.",
+      "calories": "Calories",
+      "protein": "Protein",
+      "carbs": "Carbs",
+      "fat": "Fat"
+    }
+  },
+  "Settings": {
+    "title": "Settings",
+    "subtitle": "Manage your account and app preferences.",
+    "AccountProfile": {
+      "title": "Account Profile",
+      "session_status": "Session Status"
+    },
+    "Preferences": {
+      "title": "Preferences",
+      "appearance": "Appearance",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System",
+      "language": "Language"
+    },
+    "DangerZone": {
+      "title": "Danger Zone",
+      "sign_out": "Sign Out",
+      "sign_out_description": "This will clear your secure session on this device. You will need to log in again to access your plans and progress history."
+    }
+  },
+  "Onboarding": {
+    "title": "Application Setup",
+    "subtitle": "Let's get your initial baseline",
+    "steps": {
+      "measure": "Measure",
+      "goal": "Goal",
+      "done": "Done"
+    },
+    "MeasurementStep": {
+      "title": "Initial Measurement",
+      "weight_label": "Weight (kg)",
+      "waist_label": "Waist (cm)",
+      "neck_label": "Neck (cm)",
+      "hip_label": "Hip (cm) - Female only",
+      "submit_button": "Calculate Body Fat",
+      "error_save": "Failed to save measurement. Check values."
+    },
+    "GoalStep": {
+      "title": "Set Your Goal",
+      "calculated_bf": "Calculated Body Fat",
+      "goal_type_label": "Goal Type",
+      "cutting_label": "Cutting (Lose Fat)",
+      "bulking_label": "Bulking (Gain Muscle)",
+      "target_bf_label": "Target Body Fat %",
+      "ceiling_bf_label": "Ceiling Body Fat %",
+      "submit_button": "Confirm Goal",
+      "errors": {
+        "measurement_missing": "Initial measurement is missing. Recalculate body fat before setting a goal.",
+        "measurement_invalid": "Initial measurement is invalid. Recalculate body fat before setting a goal.",
+        "invalid_target_bf": "Enter a valid target body fat percentage for a cutting goal.",
+        "target_bf_higher": "Target body fat must be lower than your current body fat for a cutting goal.",
+        "invalid_ceiling_bf": "Enter a valid ceiling body fat percentage for a bulking goal.",
+        "ceiling_bf_lower": "Ceiling body fat must be higher than your current body fat for a bulking goal.",
+        "fallback": "Failed to create goal"
+      }
+    },
+    "SuccessPanel": {
+      "title": "You're all set!",
+      "description": "Your initial analysis and goals have been saved successfully.",
+      "dashboard_button": "Go to Dashboard"
+    }
+  },
+  "Auth": {
+    "Login": {
+      "title": "Welcome Back",
+      "subtitle": "Sign in to continue your journey",
+      "email_label": "Email",
+      "email_placeholder": "you@example.com",
+      "password_label": "Password",
+      "password_placeholder": "••••••••",
+      "submit_button": "Sign In",
+      "no_account": "Don't have an account?",
+      "register_link": "Sign up",
+      "error_failed": "Login failed"
+    },
+    "Register": {
+      "title": "Create Account",
+      "subtitle": "Start your transformation today",
+      "name_label": "Full Name",
+      "email_label": "Email",
+      "password_label": "Password",
+      "dob_label": "Date of Birth",
+      "gender_label": "Gender",
+      "height_label": "Height (cm)",
+      "activity_label": "Activity Level",
+      "method_label": "Calculation Method",
+      "submit_button": "Create Account",
+      "already_have_account": "Already have an account?",
+      "login_link": "Sign in",
+      "error_failed": "Registration failed",
+      "Genders": {
+        "male": "Male",
+        "female": "Female"
+      },
+      "ActivityLevels": {
+        "sedentary": "Sedentary",
+        "lightly_active": "Lightly Active",
+        "moderately_active": "Moderately Active",
+        "very_active": "Very Active",
+        "extremely_active": "Extremely Active"
+      },
+      "Methods": {
+        "navy": "US Navy",
+        "3_site": "3-Site Skinfold",
+        "7_site": "7-Site Skinfold"
+      }
+    }
+  }
+}

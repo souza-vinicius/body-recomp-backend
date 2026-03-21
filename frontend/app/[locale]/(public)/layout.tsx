@@ -1,4 +1,4 @@
-import { PublicGuard } from '../../lib/auth/guards';
+import { PublicGuard } from '@/lib/auth/guards';
 
 export default function PublicLayout({
   children,

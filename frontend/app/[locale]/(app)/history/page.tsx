@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Clock } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { getProgressHistory } from '@/lib/api/progress';
 import { getTrends, getActiveGoal } from '@/lib/api/goals';
 import { sessionStorage } from '@/lib/auth/session-storage';
@@ -14,6 +15,7 @@ import { BodyFatTrendChart } from '@/components/charts/body-fat-trend-chart';
 import { InsufficientDataPanel } from '@/components/domain/history/insufficient-data-panel';
 
 export default function HistoryPage() {
+  const t = useTranslations('History');
   const [entries, setEntries] = useState<any[]>([]);
   const [trends, setTrends] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -37,7 +39,7 @@ export default function HistoryPage() {
         }
       }
       if (!goalId) {
-        setError('No active goal found.');
+        setError(t('no_goal_found'));
         return;
       }
 
@@ -52,7 +54,7 @@ export default function HistoryPage() {
       setEntries(sortedEntries);
       setTrends(trendsRes);
     } catch (err: any) {
-      setError(err.message || 'Failed to load history');
+      setError(err.message || t('error_loading'));
     } finally {
       setLoading(false);
     }
@@ -60,8 +62,8 @@ export default function HistoryPage() {
 
   useEffect(() => { loadData(); }, []);
 
-  if (loading) return <LoadingState message="Loading history..." />;
-  if (error) return <ErrorState message={error} onRetry={() => window.location.reload()} />;
+  if (loading) return <LoadingState message={t('loading')} />;
+  if (error) return <ErrorState message={error} onRetry={() => loadData()} />;
 
   const hasEnoughData = entries.length > 1;
 
@@ -70,9 +72,9 @@ export default function HistoryPage() {
       <div className="page-header">
         <div className="flex items-center gap-2">
           <Clock size={22} className="text-primary-500" />
-          <h1 className="page-title">Your Progress</h1>
+          <h1 className="page-title">{t('title')}</h1>
         </div>
-        <p className="page-subtitle mt-1">Review your journey and trends.</p>
+        <p className="page-subtitle mt-1">{t('subtitle')}</p>
       </div>
 
       {!hasEnoughData ? (
@@ -91,4 +93,5 @@ export default function HistoryPage() {
     </div>
   );
 }
+
 

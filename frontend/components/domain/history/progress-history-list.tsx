@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Calendar, Scale, Pencil } from 'lucide-react';
+import { useTranslations, useFormatter } from 'next-intl';
 import { EditProgressModal } from '@/components/domain/progress/edit-progress-modal';
 import { updateProgressEntry } from '@/lib/api/progress';
 import { updateMeasurement } from '@/lib/api/measurements';
@@ -13,10 +14,12 @@ interface ProgressHistoryListProps {
 }
 
 export function ProgressHistoryList({ entries, onEntryUpdated }: ProgressHistoryListProps) {
+  const t = useTranslations('Progress.RecentLogs');
+  const format = useFormatter();
   const [editingEntry, setEditingEntry] = useState<any | null>(null);
 
   if (!entries || entries.length === 0) {
-    return <p className="text-surface-400 italic text-center py-6 text-sm">No history records found.</p>;
+    return <p className="text-surface-400 italic text-center py-6 text-sm">{t('no_history')}</p>;
   }
 
   const handleSave = async (
@@ -57,7 +60,7 @@ export function ProgressHistoryList({ entries, onEntryUpdated }: ProgressHistory
   return (
     <>
       <div className="space-y-4">
-        <h3 className="text-xs font-bold text-surface-400 uppercase tracking-widest">Recent Logs</h3>
+        <h3 className="text-xs font-bold text-surface-400 uppercase tracking-widest">{t('title')}</h3>
         <div className="space-y-2">
           {entries.map((entry: any, index: number) => {
             const weight = Number(entry.weight_kg) || 0;
@@ -77,7 +80,7 @@ export function ProgressHistoryList({ entries, onEntryUpdated }: ProgressHistory
                 </div>
                 <div className="min-w-0">
                   <div className="font-semibold text-surface-900 text-sm">
-                    {new Date(entry.logged_at).toLocaleDateString(undefined, {
+                    {format.dateTime(new Date(entry.logged_at), {
                       weekday: 'short',
                       month: 'short',
                       day: 'numeric',
@@ -86,14 +89,14 @@ export function ProgressHistoryList({ entries, onEntryUpdated }: ProgressHistory
                   <div className="text-[11px] text-surface-400 mt-1 flex items-center gap-2 flex-wrap">
                     <span className="flex items-center gap-1 font-medium text-surface-600">
                       <Scale size={12} />
-                      {weight.toFixed(1)} kg
+                      {format.number(weight, { maximumFractionDigits: 1 })} kg
                     </span>
                     <span className="text-surface-200">•</span>
-                    <span className="font-semibold text-primary-600">{bf.toFixed(1)}% BF</span>
+                    <span className="font-semibold text-primary-600">{format.number(bf, { maximumFractionDigits: 1 })}% BF</span>
                     <span className="text-surface-200">•</span>
-                    <span className="text-surface-500" title="Fat Mass (Gordura Corporal)">{fatMass.toFixed(1)}kg Fat</span>
+                    <span className="text-surface-500" title={t('fat_mass_label')}>{format.number(fatMass, { maximumFractionDigits: 1 })}kg {t('fat')}</span>
                     <span className="text-surface-200">•</span>
-                    <span className="text-surface-500" title="Lean Mass (Massa Magra)">{leanMass.toFixed(1)}kg Lean</span>
+                    <span className="text-surface-500" title={t('lean_mass_label')}>{format.number(leanMass, { maximumFractionDigits: 1 })}kg {t('lean')}</span>
                   </div>
                   {entry.notes && (
                     <div className="text-xs text-surface-300 truncate mt-0.5 max-w-[200px]" title={entry.notes}>
@@ -105,7 +108,7 @@ export function ProgressHistoryList({ entries, onEntryUpdated }: ProgressHistory
               <button
                 onClick={() => setEditingEntry(entry)}
                 className="p-2 rounded-xl text-surface-300 hover:text-primary-600 hover:bg-primary-50 transition-all flex-shrink-0"
-                title="Edit entry"
+                title={t('edit_entry')}
               >
                 <Pencil size={16} />
               </button>
@@ -125,3 +128,4 @@ export function ProgressHistoryList({ entries, onEntryUpdated }: ProgressHistory
     </>
   );
 }
+

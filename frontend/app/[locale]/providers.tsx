@@ -1,7 +1,8 @@
 'use client';
 
-import { useAuthStore } from '../lib/state/auth-store';
+import { useAuthStore } from '../../lib/state/auth-store';
 import { useEffect } from 'react';
+import { ThemeProvider } from 'next-themes';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const initialize = useAuthStore(state => state.initialize);
@@ -10,5 +11,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
     initialize();
   }, [initialize]);
 
-  return <>{children}</>;
+  return (
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      {children}
+    </ThemeProvider>
+  );
 }

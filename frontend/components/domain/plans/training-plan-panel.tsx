@@ -1,13 +1,16 @@
 import React from 'react';
 import { Dumbbell, Activity, Moon, Clock, Flame, Repeat } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface TrainingPlanPanelProps {
   trainingPlan: any;
 }
 
 export function TrainingPlanPanel({ trainingPlan }: TrainingPlanPanelProps) {
+  const t = useTranslations('Plans.TrainingPlan');
+
   if (!trainingPlan) {
-    return <div className="card p-6 text-surface-400 text-sm">No training plan available.</div>;
+    return <div className="card p-6 text-surface-400 text-sm">{t('no_plan')}</div>;
   }
 
   const details = trainingPlan.plan_details;
@@ -19,11 +22,11 @@ export function TrainingPlanPanel({ trainingPlan }: TrainingPlanPanelProps) {
           <div className="w-8 h-8 rounded-lg bg-surface-800 flex items-center justify-center">
             <Dumbbell size={16} className="text-primary-400" />
           </div>
-          <h3 className="text-sm font-bold text-white tracking-wide uppercase">Training Plan</h3>
+          <h3 className="text-sm font-bold text-white tracking-wide uppercase">{t('title')}</h3>
         </div>
         <div className="text-right">
-          <span className="text-xs text-surface-400 block">Frequency</span>
-          <span className="font-bold text-white">{trainingPlan.workout_frequency}x <span className="font-normal text-surface-400 text-xs">/ week</span></span>
+          <span className="text-xs text-surface-400 block">{t('frequency')}</span>
+          <span className="font-bold text-white">{trainingPlan.workout_frequency}x <span className="font-normal text-surface-400 text-xs">{t('per_week')}</span></span>
         </div>
       </div>
       
@@ -34,9 +37,9 @@ export function TrainingPlanPanel({ trainingPlan }: TrainingPlanPanelProps) {
           <div className="p-6">
             <div className="flex items-center gap-2 mb-4">
               <Dumbbell size={18} className="text-primary-600" />
-              <h4 className="font-bold text-surface-900">Strength Training</h4>
+              <h4 className="font-bold text-surface-900">{t('strength_training')}</h4>
               <span className="ml-auto text-xs font-semibold bg-primary-50 text-primary-700 px-2 py-1 rounded-md">
-                {details.strength_training.frequency}x / week
+                {details.strength_training.frequency}x {t('per_week')}
               </span>
             </div>
             
@@ -48,9 +51,9 @@ export function TrainingPlanPanel({ trainingPlan }: TrainingPlanPanelProps) {
                   <div key={i} className="flex gap-4 p-3 bg-surface-50 rounded-xl border border-surface-100 items-center justify-between hover:border-surface-200 transition-colors">
                     <span className="font-semibold text-sm text-surface-800 flex-1">{ex.name}</span>
                     <div className="flex items-center gap-4 text-xs font-medium text-surface-500">
-                      <span className="flex items-center gap-1.5 w-16" title="Sets"><Repeat size={14} className="text-surface-400" /> {ex.sets}</span>
-                      <span className="flex items-center gap-1.5 w-16" title="Reps"><Flame size={14} className="text-surface-400" /> {ex.reps}</span>
-                      <span className="flex items-center gap-1.5 w-20 justify-end" title="Rest"><Clock size={14} className="text-surface-400" /> {ex.rest}</span>
+                      <span className="flex items-center gap-1.5 w-16" title={t('sets')}><Repeat size={14} className="text-surface-400" /> {ex.sets}</span>
+                      <span className="flex items-center gap-1.5 w-16" title={t('reps')}><Flame size={14} className="text-surface-400" /> {ex.reps}</span>
+                      <span className="flex items-center gap-1.5 w-20 justify-end" title={t('rest')}><Clock size={14} className="text-surface-400" /> {ex.rest}</span>
                     </div>
                   </div>
                 ))}
@@ -59,12 +62,12 @@ export function TrainingPlanPanel({ trainingPlan }: TrainingPlanPanelProps) {
             
             <div className="space-y-3 bg-surface-50/50 p-4 rounded-xl">
               <div>
-                <span className="text-xs font-bold text-surface-900 block mb-1">Progression</span>
+                <span className="text-xs font-bold text-surface-900 block mb-1">{t('progression')}</span>
                 <p className="text-xs text-surface-600 leading-relaxed">{details.strength_training.progression}</p>
               </div>
               {details.strength_training.notes && (
                 <div>
-                  <span className="text-xs font-bold text-surface-900 block mb-1">Notes</span>
+                  <span className="text-xs font-bold text-surface-900 block mb-1">{t('notes')}</span>
                   <p className="text-xs text-surface-600 leading-relaxed">{details.strength_training.notes}</p>
                 </div>
               )}
@@ -77,9 +80,9 @@ export function TrainingPlanPanel({ trainingPlan }: TrainingPlanPanelProps) {
           <div className="p-6">
             <div className="flex items-center gap-2 mb-4">
               <Activity size={18} className="text-blue-500" />
-              <h4 className="font-bold text-surface-900">Cardio</h4>
+              <h4 className="font-bold text-surface-900">{t('cardio')}</h4>
               <span className="ml-auto text-xs font-semibold bg-blue-50 text-blue-700 px-2 py-1 rounded-md">
-                {details.cardio.frequency}x / week
+                {details.cardio.frequency}x {t('per_week')}
               </span>
             </div>
             
@@ -94,11 +97,11 @@ export function TrainingPlanPanel({ trainingPlan }: TrainingPlanPanelProps) {
                       <span className="text-xs font-medium text-surface-500 flex items-center gap-1"><Clock size={12}/>{act.duration}</span>
                     </div>
                     <div className="text-xs">
-                      <span className="text-surface-400">Intensity: </span>
+                      <span className="text-surface-400">{t('intensity')}: </span>
                       <span className="font-medium text-surface-700">{act.intensity}</span>
                     </div>
                     <div className="text-xs mt-1">
-                      <span className="text-surface-400 block mb-1">Examples:</span>
+                      <span className="text-surface-400 block mb-1">{t('examples')}:</span>
                       <span className="text-surface-600 italic">"{act.examples}"</span>
                     </div>
                   </div>
@@ -108,7 +111,7 @@ export function TrainingPlanPanel({ trainingPlan }: TrainingPlanPanelProps) {
             
             {details.cardio.notes && (
               <div className="bg-surface-50/50 p-3 rounded-lg">
-                <p className="text-xs text-surface-600 leading-relaxed"><span className="font-bold text-surface-900">Notes:</span> {details.cardio.notes}</p>
+                <p className="text-xs text-surface-600 leading-relaxed"><span className="font-bold text-surface-900">{t('notes')}:</span> {details.cardio.notes}</p>
               </div>
             )}
           </div>
@@ -119,22 +122,22 @@ export function TrainingPlanPanel({ trainingPlan }: TrainingPlanPanelProps) {
           <div className="p-6 bg-surface-50/30">
             <div className="flex items-center gap-2 mb-4">
               <Moon size={18} className="text-indigo-500" />
-              <h4 className="font-bold text-surface-900">Recovery</h4>
+              <h4 className="font-bold text-surface-900">{t('recovery')}</h4>
             </div>
             
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div className="p-4 bg-white rounded-xl border border-surface-100 shadow-sm text-center">
-                <span className="text-xs font-semibold text-surface-400 block mb-1 uppercase tracking-wider">Rest Days</span>
-                <span className="text-xl font-black text-surface-900">{details.recovery.rest_days} <span className="text-xs font-medium text-surface-400">/ week</span></span>
+                <span className="text-xs font-semibold text-surface-400 block mb-1 uppercase tracking-wider">{t('rest_days')}</span>
+                <span className="text-xl font-black text-surface-900">{details.recovery.rest_days} <span className="text-xs font-medium text-surface-400">{t('per_week')}</span></span>
               </div>
               <div className="p-4 bg-white rounded-xl border border-surface-100 shadow-sm text-center">
-                <span className="text-xs font-semibold text-surface-400 block mb-1 uppercase tracking-wider">Sleep Target</span>
-                <span className="text-xl font-black text-surface-900">{details.recovery.sleep_target.split(' ')[0]} <span className="text-xs font-medium text-surface-400">hours</span></span>
+                <span className="text-xs font-semibold text-surface-400 block mb-1 uppercase tracking-wider">{t('sleep_target')}</span>
+                <span className="text-xl font-black text-surface-900">{details.recovery.sleep_target.split(' ')[0]} <span className="text-xs font-medium text-surface-400">{t('hours')}</span></span>
               </div>
             </div>
             
             {details.recovery.notes && (
-              <p className="text-xs text-surface-600 leading-relaxed text-center"><span className="font-bold text-surface-900">Focus:</span> {details.recovery.notes}</p>
+              <p className="text-xs text-surface-600 leading-relaxed text-center"><span className="font-bold text-surface-900">{t('notes')}:</span> {details.recovery.notes}</p>
             )}
           </div>
         )}
@@ -143,7 +146,7 @@ export function TrainingPlanPanel({ trainingPlan }: TrainingPlanPanelProps) {
         {trainingPlan.notes && (
           <div className="p-6">
             <div className="p-4 bg-primary-50 rounded-xl text-sm text-primary-800 border border-primary-100">
-              <span className="font-bold block mb-1">Plan Notes</span>
+              <span className="font-bold block mb-1">{t('plan_notes')}</span>
               {trainingPlan.notes}
             </div>
           </div>
@@ -152,3 +155,4 @@ export function TrainingPlanPanel({ trainingPlan }: TrainingPlanPanelProps) {
     </div>
   );
 }
+

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Dumbbell } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { submitProgress } from '@/lib/api/progress';
 import { getActiveGoal } from '@/lib/api/goals';
 import { sessionStorage } from '@/lib/auth/session-storage';
@@ -33,6 +34,7 @@ async function resolveGoalId(): Promise<string | null> {
 }
 
 export default function NewProgressPage() {
+  const t = useTranslations('Progress.New');
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,11 +46,11 @@ export default function NewProgressPage() {
 
   useEffect(() => {
     resolveGoalId().then((id) => {
-      if (!id) setError('No active goal found. Please set a goal first.');
+      if (!id) setError(t('error_no_goal'));
       setGoalId(id);
       setGoalLoading(false);
     });
-  }, []);
+  }, [t]);
 
   const handleSubmit = async (data: any) => {
     try {
@@ -57,7 +59,7 @@ export default function NewProgressPage() {
 
       const id = goalId ?? await resolveGoalId();
       if (!id) {
-        throw new Error('No active goal found. Please set a goal first.');
+        throw new Error(t('error_no_goal'));
       }
 
       const entry = await submitProgress(id, data);
@@ -74,7 +76,7 @@ export default function NewProgressPage() {
         entry,
       });
     } catch (err: any) {
-      setError(err.message || 'Failed to submit progress. Please try again.');
+      setError(err.message || t('error_submit_failed'));
     } finally {
       setLoading(false);
     }
@@ -89,7 +91,7 @@ export default function NewProgressPage() {
   }
 
   if (goalLoading) {
-    return <LoadingState message="Loading..." />;
+    return <LoadingState message={t('loading')} />;
   }
 
   return (
@@ -97,9 +99,9 @@ export default function NewProgressPage() {
       <div className="page-header">
         <div className="flex items-center gap-2">
           <Dumbbell size={22} className="text-primary-500" />
-          <h1 className="page-title">Log Weekly Progress</h1>
+          <h1 className="page-title">{t('title')}</h1>
         </div>
-        <p className="page-subtitle mt-1">Consistency is the key to body recomposition.</p>
+        <p className="page-subtitle mt-1">{t('subtitle')}</p>
       </div>
 
       <CeilingAlert currentBodyFat={currentBodyFat} />
@@ -114,3 +116,4 @@ export default function NewProgressPage() {
     </div>
   );
 }
+

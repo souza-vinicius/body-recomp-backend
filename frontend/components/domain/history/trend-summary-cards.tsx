@@ -1,15 +1,31 @@
 import React from 'react';
 import { Activity, TrendingDown } from 'lucide-react';
+import { useTranslations, useFormatter } from 'next-intl';
 
 interface TrendSummaryCardsProps {
   trends: any;
 }
 
 export function TrendSummaryCards({ trends }: TrendSummaryCardsProps) {
+  const t = useTranslations('History.TrendCards');
+  const tk = useTranslations('Dashboard.KpiCards');
+  const format = useFormatter();
+  
   if (!trends) return null;
 
   const weightChange = Number(trends.weekly_weight_change_avg) || 0;
   const isLosing = weightChange < 0;
+
+  const formatTrend = (trend: string) => {
+    if (!trend) return t('calculating');
+    // Map backend trends to translation keys
+    const key = trend.toLowerCase();
+    if (key === 'improving') return tk('trend_improving');
+    if (key === 'stable') return tk('trend_stable');
+    if (key === 'worsening') return tk('trend_worsening');
+    if (key === 'fast') return tk('trend_fast');
+    return trend.replace(/_/g, ' ');
+  };
 
   return (
     <div className="grid grid-cols-2 gap-3">
@@ -18,9 +34,9 @@ export function TrendSummaryCards({ trends }: TrendSummaryCardsProps) {
           <Activity size={18} className="text-primary-600" />
         </div>
         <div>
-          <h4 className="stat-label">Pace</h4>
+          <h4 className="stat-label">{t('pace')}</h4>
           <div className="stat-value capitalize">
-            {trends.trend?.replace(/_/g, ' ') || 'Calculating...'}
+            {formatTrend(trends.trend)}
           </div>
         </div>
       </div>
@@ -31,12 +47,14 @@ export function TrendSummaryCards({ trends }: TrendSummaryCardsProps) {
           <TrendingDown size={18} className={isLosing ? 'text-green-600' : 'text-amber-600'} />
         </div>
         <div>
-          <h4 className="stat-label">Avg Weekly</h4>
+          <h4 className="stat-label">{t('avg_weekly')}</h4>
           <div className={`stat-value ${isLosing ? 'text-green-600' : 'text-amber-600'}`}>
-            {weightChange > 0 ? '+' : ''}{weightChange.toFixed(2)} kg
+            {weightChange > 0 ? '+' : ''}{format.number(weightChange, { maximumFractionDigits: 2 })} kg
           </div>
         </div>
       </div>
     </div>
   );
 }
+
+

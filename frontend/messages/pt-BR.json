@@ -1,0 +1,304 @@
+{
+  "Index": {
+    "title": "Bem-vindo ao Body Recomp!"
+  },
+  "AppNav": {
+    "dashboard": "Painel",
+    "progress": "Progresso",
+    "history": "Histórico",
+    "plans": "Planos"
+  },
+  "Dashboard": {
+    "title": "Painel de Controle",
+    "greeting_morning": "Bom dia",
+    "greeting_afternoon": "Boa tarde",
+    "greeting_evening": "Boa noite",
+    "loading": "Carregando o painel...",
+    "error_loading": "Falha ao carregar o painel",
+    "QuickActions": {
+      "title": "Ações Rápidas",
+      "log_progress": "Registrar Progresso",
+      "view_history": "Ver Histórico",
+      "my_plans": "Meus Planos"
+    },
+    "NoGoalPanel": {
+      "title": "Sem Meta Ativa",
+      "description": "Você não tem uma meta de recomposição corporal ativa. Configure uma para começar a acompanhar seu progresso.",
+      "button": "Configurar Meta"
+    },
+    "KpiCards": {
+      "est_weeks": "Sems. Est.",
+      "pace": "Ritmo",
+      "trend_improving": "Melhorando",
+      "trend_stable": "Estável",
+      "trend_worsening": "Piorando",
+      "trend_fast": "Rápido",
+      "weeks_unit": "semanas"
+    },
+    "GoalSummaryCard": {
+      "cutting_phase": "Fase de Cutting",
+      "bulking_phase": "Fase de Bulking",
+      "body_fat": "Gordura Corporal",
+      "target": "Alvo",
+      "ceiling": "Teto",
+      "status": "Status",
+      "active": "Ativo",
+      "progress_label": "Progresso"
+    }
+  },
+  "Progress": {
+    "title": "Progresso",
+    "subtitle": "Acompanhe sua jornada de recomposição corporal.",
+    "loading": "Carregando progresso...",
+    "error_loading": "Falha ao carregar progresso",
+    "log_button": "Registrar",
+    "no_progress_title": "Sem Progresso Ainda",
+    "no_progress_description": "Registre sua primeira medição semanal para começar a acompanhar sua jornada.",
+    "log_first_entry": "Registrar Primeira Entrada",
+    "RecentLogs": {
+      "title": "Registros Recentes",
+      "no_history": "Nenhum registro de histórico encontrado.",
+      "fat_mass_label": "Massa Gorda",
+      "lean_mass_label": "Massa Magra",
+      "fat": "Gordura",
+      "lean": "Magra",
+      "edit_entry": "Editar registro"
+    },
+    "EditModal": {
+      "title": "Editar Entrada",
+      "week": "Semana",
+      "weight": "Peso",
+      "body_fat": "Gordura",
+      "entry_date": "Data da Entrada",
+      "weight_label": "Peso (kg)",
+      "circumferences_title": "Medições de Circunferência",
+      "circumferences_hint": "Deixe em branco para manter os valores atuais. O BF será recalculado.",
+      "waist_label": "Cintura (cm)",
+      "neck_label": "Pescoço (cm)",
+      "hip_label": "Quadril (cm) - Apenas mulheres",
+      "notes_label": "Notas",
+      "notes_placeholder": "Como você se sentiu esta semana?",
+      "cancel": "Cancelar",
+      "save": "Salvar",
+      "error_update": "Falha ao atualizar"
+    },
+    "New": {
+      "title": "Registrar Progresso Semanal",
+      "subtitle": "Consistência é a chave para a recomposição corporal.",
+      "loading": "Carregando...",
+      "error_no_goal": "Nenhuma meta ativa encontrada. Por favor, defina uma meta primeiro.",
+      "error_submit_failed": "Falha ao enviar progresso. Por favor, tente novamente."
+    },
+    "Form": {
+      "Sections": {
+        "date_title": "Data da Entrada",
+        "date_description": "Se já existir um registro para esta data, ele será substituído.",
+        "measurements_title": "Medidas Corporais",
+        "lifestyle_title": "Estilo de Vida e Hábitos"
+      },
+      "Fields": {
+        "weight_label": "Peso (kg)",
+        "method_label": "Método de Medição de Gordura",
+        "neck_label": "Pescoço (cm)",
+        "waist_label": "Cintura (cm)",
+        "hip_label": "Quadril (cm) – Opcional",
+        "chest_label": "Peito (mm)",
+        "abdomen_label": "Abdômen (mm)",
+        "thigh_label": "Coxa (mm)",
+        "tricep_label": "Tríceps (mm)",
+        "suprailiac_label": "Suprailíaco (mm)",
+        "midaxillary_label": "Axilar Média (mm)",
+        "subscapular_label": "Subescapular (mm)",
+        "energy_level": "Nível de Energia (1-10)",
+        "stress_level": "Nível de Estresse (1-10)",
+        "sleep_quality": "Qualidade do Sono (1-10)",
+        "adherence_percentage": "Aderência à Dieta %",
+        "notes_label": "Notas (Opcional)",
+        "notes_placeholder": "Como você se sentiu esta semana?",
+        "energy_label": "Nível de Energia (1-10)",
+        "stress_label": "Nível de Estresse (1-10)",
+        "sleep_label": "Qualidade do Sono (1-10)",
+        "adherence_label": "Aderência à Dieta %"
+      },
+      "Methods": {
+        "navy": "Marinha EUA (Fita)",
+        "3_site": "Dobras Cutâneas (3-site)",
+        "7_site": "Dobras Cutâneas (7-site)",
+        "skinfold_hint": "Homem: peito, abdômen, coxa. Mulher: tríceps, suprailíaco, coxa."
+      },
+      "submit_button": "Registrar Progresso"
+    }
+  },
+  "History": {
+    "title": "Seu Progresso",
+    "subtitle": "Reveja sua jornada e tendências.",
+    "loading": "Carregando histórico...",
+    "error_loading": "Falha ao carregar histórico",
+    "no_goal_found": "Nenhum objetivo ativo encontrado.",
+    "InsufficientData": {
+      "title": "Continue Acompanhando!",
+      "description": "Precisamos de pelo menos duas medições para calcular suas tendências e velocidade de progresso. Lembre-se de registrar seus números semanalmente."
+    },
+    "TrendCards": {
+      "pace": "Ritmo",
+      "calculating": "Calculando...",
+      "avg_weekly": "Média Semanal"
+    }
+  },
+  "Plans": {
+    "title": "Seu Plano de Recomp",
+    "subtitle": "Recomendações geradas por IA baseadas no seu objetivo atual.",
+    "loading": "Carregando seu plano...",
+    "error_loading": "Falha ao carregar planos",
+    "no_goal_found": "Nenhum objetivo ativo encontrado. Por favor, configure um objetivo primeiro.",
+    "unavailable_title": "Plano Indisponível",
+    "unavailable_description": "Seu plano ainda está sendo gerado ou está indisponível.",
+    "check_again": "Verificar Novamente",
+    "DailyTargets": {
+      "title": "Metas Diárias",
+      "calories": "Calorias",
+      "protein": "Proteína",
+      "carbs": "Carbos",
+      "fats": "Gorduras",
+      "calories_unit": "kcal",
+      "grams_unit": "g"
+    },
+    "TrainingPlan": {
+      "title": "Plano de Treino",
+      "no_plan": "Nenhum plano de treino disponível.",
+      "frequency": "Frequência",
+      "per_week": "/ semana",
+      "strength_training": "Treino de Força",
+      "progression": "Progressão",
+      "notes": "Notas",
+      "cardio": "Cardio",
+      "intensity": "Intensidade",
+      "examples": "Exemplos",
+      "recovery": "Recuperação",
+      "rest_days": "Dias de Descanso",
+      "sleep_target": "Meta de Sono",
+      "hours": "horas",
+      "sets": "Séries",
+      "reps": "Reps",
+      "rest": "Descanso",
+      "plan_notes": "Notas do Plano"
+    },
+    "DietPlan": {
+      "title": "Plano de Dieta",
+      "no_plan": "Nenhum plano de dieta disponível.",
+      "calories": "Calorias",
+      "protein": "Proteína",
+      "carbs": "Carbos",
+      "fat": "Gordura"
+    }
+  },
+  "Settings": {
+    "title": "Configurações",
+    "subtitle": "Gerencie sua conta e preferências do app.",
+    "AccountProfile": {
+      "title": "Perfil da Conta",
+      "session_status": "Status da Sessão"
+    },
+    "Preferences": {
+      "title": "Preferências",
+      "appearance": "Aparência",
+      "light": "Claro",
+      "dark": "Escuro",
+      "system": "Sistema",
+      "language": "Idioma"
+    },
+    "DangerZone": {
+      "title": "Zona de Perigo",
+      "sign_out": "Sair",
+      "sign_out_description": "Isso limpará sua sessão segura neste dispositivo. Você precisará fazer login novamente para acessar seus planos e histórico de progresso."
+    }
+  },
+  "Onboarding": {
+    "title": "Configuração do App",
+    "subtitle": "Vamos definir sua base inicial",
+    "steps": {
+      "measure": "Medir",
+      "goal": "Meta",
+      "done": "Pronto"
+    },
+    "MeasurementStep": {
+      "title": "Medição Inicial",
+      "weight_label": "Peso (kg)",
+      "waist_label": "Cintura (cm)",
+      "neck_label": "Pescoço (cm)",
+      "hip_label": "Quadril (cm) - Apenas mulheres",
+      "submit_button": "Calcular Gordura Corporal",
+      "error_save": "Falha ao salvar medição. Verifique os valores."
+    },
+    "GoalStep": {
+      "title": "Defina seu Objetivo",
+      "calculated_bf": "Gordura Corporal Calculada",
+      "goal_type_label": "Tipo de Objetivo",
+      "cutting_label": "Cutting (Perder Gordura)",
+      "bulking_label": "Bulking (Gain Muscle)",
+      "target_bf_label": "Meta de % de Gordura",
+      "ceiling_bf_label": "Teto de % de Gordura",
+      "submit_button": "Confirmar Objetivo",
+      "errors": {
+        "measurement_missing": "Medição inicial ausente. Recalcule a gordura corporal antes de definir um objetivo.",
+        "measurement_invalid": "Medição inicial inválida. Recalculate a gordura corporal antes de definir um objetivo.",
+        "invalid_target_bf": "Insira uma porcentagem de gordura alvo válida para um objetivo de cutting.",
+        "target_bf_higher": "A gordura alvo deve ser menor que a atual para um objetivo de cutting.",
+        "invalid_ceiling_bf": "Insira uma porcentagem de gordura teto válida para um objetivo de bulking.",
+        "ceiling_bf_lower": "A gordura teto deve ser maior que a atual para um objetivo de bulking.",
+        "fallback": "Falha ao criar objetivo"
+      }
+    },
+    "SuccessPanel": {
+      "title": "Tudo pronto!",
+      "description": "Sua análise inicial e objetivos foram salvos com sucesso.",
+      "dashboard_button": "Ir para o Painel"
+    }
+  },
+  "Auth": {
+    "Login": {
+      "title": "Bem-vindo de Volta",
+      "subtitle": "Faça login para continuar sua jornada",
+      "email_label": "Email",
+      "email_placeholder": "voce@exemplo.com",
+      "password_label": "Senha",
+      "password_placeholder": "••••••••",
+      "submit_button": "Entrar",
+      "no_account": "Não tem uma conta?",
+      "register_link": "Cadastre-se",
+      "error_failed": "Falha no login"
+    },
+    "Register": {
+      "title": "Criar Conta",
+      "subtitle": "Comece sua transformação hoje",
+      "name_label": "Nome Completo",
+      "email_label": "Email",
+      "password_label": "Senha",
+      "dob_label": "Data de Nascimento",
+      "gender_label": "Gênero",
+      "height_label": "Altura (cm)",
+      "activity_label": "Nível de Atividade",
+      "method_label": "Método de Cálculo",
+      "submit_button": "Criar Conta",
+      "already_have_account": "Já tem uma conta?",
+      "login_link": "Entrar",
+      "error_failed": "Falha no cadastro",
+      "Genders": {
+        "male": "Masculino",
+        "female": "Feminino"
+      },
+      "ActivityLevels": {
+        "sedentary": "Sedentário",
+        "lightly_active": "Levemente Ativo",
+        "moderately_active": "Moderadamente Ativo",
+        "very_active": "Muito Ativo",
+        "extremely_active": "Extremamente Ativo"
+      },
+      "Methods": {
+        "navy": "Marinha EUA",
+        "3_site": "Dobras (3 locais)",
+        "7_site": "Dobras (7 locais)"
+      }
+    }
+  }
+}

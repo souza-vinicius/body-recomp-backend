@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Target } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useOnboardingStore } from '../../../lib/state/onboarding-draft-store';
 import { createGoal } from '../../../lib/api/goals';
 import { ApiError } from '../../../lib/api/types';
@@ -17,6 +18,7 @@ const API_GOAL_TYPE = {
 } as const;
 
 export function GoalStep({ onNext }: { onNext: () => void }) {
+  const t = useTranslations('Onboarding.Steps.Goal');
   const { data, updateData, clearData } = useOnboardingStore();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,11 +33,11 @@ export function GoalStep({ onNext }: { onNext: () => void }) {
       const initialMeasurementId = data.measurement_id;
 
       if (!initialMeasurementId) {
-        throw new Error('Initial measurement is missing. Recalculate body fat before setting a goal.');
+        throw new Error(t('error_missing_measurement'));
       }
 
       if (!UUID_PATTERN.test(initialMeasurementId)) {
-        throw new Error('Initial measurement is invalid. Recalculate body fat before setting a goal.');
+        throw new Error(t('error_invalid_measurement'));
       }
 
       const targetBodyFat = data.target_body_fat_percentage
@@ -55,21 +57,21 @@ export function GoalStep({ onNext }: { onNext: () => void }) {
 
       if (goalType === 'cutting') {
         if (targetBodyFat === undefined || Number.isNaN(targetBodyFat)) {
-          throw new Error('Enter a valid target body fat percentage for a cutting goal.');
+          throw new Error(t('error_invalid_target_bf'));
         }
 
         if (typeof data.calculated_bf === 'number' && targetBodyFat >= data.calculated_bf) {
-          throw new Error('Target body fat must be lower than your current body fat for a cutting goal.');
+          throw new Error(t('error_target_bf_too_high'));
         }
       }
 
       if (goalType === 'bulking') {
         if (ceilingBodyFat === undefined || Number.isNaN(ceilingBodyFat)) {
-          throw new Error('Enter a valid ceiling body fat percentage for a bulking goal.');
+          throw new Error(t('error_invalid_ceiling_bf'));
         }
 
         if (typeof data.calculated_bf === 'number' && ceilingBodyFat <= data.calculated_bf) {
-          throw new Error('Ceiling body fat must be higher than your current body fat for a bulking goal.');
+          throw new Error(t('error_ceiling_bf_too_low'));
         }
       }
 
@@ -84,7 +86,7 @@ export function GoalStep({ onNext }: { onNext: () => void }) {
       } else if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Failed to create goal');
+        setError(t('error_fallback'));
       }
     } finally {
       setIsLoading(false);
@@ -94,17 +96,17 @@ export function GoalStep({ onNext }: { onNext: () => void }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="bg-surface-900 text-white p-5 rounded-xl text-center mb-6">
-        <p className="text-xs text-surface-400 font-semibold uppercase tracking-wider">Calculated Body Fat</p>
+        <p className="text-xs text-surface-400 font-semibold uppercase tracking-wider">{t('calculated_bf_label')}</p>
         <p className="text-4xl font-black mt-1 text-primary-400">{data.calculated_bf?.toFixed(1)}%</p>
       </div>
 
       <div className="flex items-center gap-2">
         <Target size={20} className="text-primary-500" />
-        <h3 className="text-lg font-bold text-surface-900">Set Your Goal</h3>
+        <h3 className="text-lg font-bold text-surface-900">{t('title')}</h3>
       </div>
       
       <SelectField 
-        label="Goal Type" 
+        label={t('type_label')} 
         name="goal_type" 
         value={data.goal_type || 'cutting'} 
         onChange={e =>
@@ -116,14 +118,14 @@ export function GoalStep({ onNext }: { onNext: () => void }) {
         } 
         required 
         options={[
-          { label: 'Cutting (Lose Fat)', value: 'cutting' },
-          { label: 'Bulking (Gain Muscle)', value: 'bulking' }
+          { label: t('Options.cutting'), value: 'cutting' },
+          { label: t('Options.bulking'), value: 'bulking' }
         ]} 
       />
 
       {(data.goal_type === 'cutting' || !data.goal_type) && (
         <TextField 
-          label="Target Body Fat %" 
+          label={t('target_bf_label')} 
           type="number" step="0.1" 
           min="3"
           max="50"
@@ -135,7 +137,7 @@ export function GoalStep({ onNext }: { onNext: () => void }) {
 
       {data.goal_type === 'bulking' && (
         <TextField 
-          label="Ceiling Body Fat %" 
+          label={t('ceiling_bf_label')} 
           type="number" step="0.1" 
           min="3"
           max="30"
@@ -148,8 +150,9 @@ export function GoalStep({ onNext }: { onNext: () => void }) {
       {error && <div className="text-red-600 text-sm p-3 bg-red-50 rounded-xl border border-red-100 font-medium">{error}</div>}
       
       <SubmitButton type="submit" isLoading={isLoading} className="w-full">
-        Confirm Goal
+        {t('submit_button')}
       </SubmitButton>
     </form>
   );
 }
+

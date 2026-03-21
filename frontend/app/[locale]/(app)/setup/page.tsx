@@ -1,26 +1,28 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { MeasurementStep } from '@/components/domain/onboarding/measurement-step';
 import { GoalStep } from '@/components/domain/onboarding/goal-step';
 import { GoalSuccessPanel } from '@/components/domain/onboarding/goal-success-panel';
 
 export default function SetupPage() {
+  const t = useTranslations('Onboarding');
   const [step, setStep] = useState(1);
 
   const nextStep = () => setStep((s) => s + 1);
 
   const steps = [
-    { num: 1, label: 'Measure' },
-    { num: 2, label: 'Goal' },
-    { num: 3, label: 'Done' },
+    { num: 1, label: t('steps.measure') },
+    { num: 2, label: t('steps.goal') },
+    { num: 3, label: t('steps.done') },
   ];
 
   return (
     <div className="max-w-xl mx-auto space-y-8 animate-slide-up">
       <div className="text-center page-header">
-        <h2 className="page-title">Application Setup</h2>
-        <p className="page-subtitle mt-1">Let's get your initial baseline</p>
+        <h2 className="page-title">{t('title')}</h2>
+        <p className="page-subtitle mt-1">{t('subtitle')}</p>
       </div>
 
       {/* Step Indicator */}
@@ -54,3 +56,4 @@ export default function SetupPage() {
     </div>
   );
 }
+

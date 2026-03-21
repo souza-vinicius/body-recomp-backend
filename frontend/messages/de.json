@@ -1,0 +1,300 @@
+{
+  "Index": {
+    "title": "Willkommen bei Body Recomp!"
+  },
+  "AppNav": {
+    "dashboard": "Dashboard",
+    "progress": "Fortschritt",
+    "history": "Verlauf",
+    "plans": "Pläne"
+  },
+  "Dashboard": {
+    "title": "Dashboard",
+    "greeting_morning": "Guten Morgen",
+    "greeting_afternoon": "Guten Tag",
+    "greeting_evening": "Guten Abend",
+    "loading": "Dashboard wird geladen...",
+    "error_loading": "Dashboard konnte nicht geladen werden",
+    "QuickActions": {
+      "title": "Schnellaktionen",
+      "log_progress": "Fortschritt protokollieren",
+      "view_history": "Verlauf anzeigen",
+      "my_plans": "Meine Pläne"
+    },
+    "NoGoalPanel": {
+      "title": "Kein aktives Ziel",
+      "description": "Sie haben kein aktives Körperrekompositionsziel. Richten Sie eines ein, um Ihren Fortschritt zu verfolgen.",
+      "button": "Ziel einrichten"
+    },
+    "KpiCards": {
+      "est_weeks": "Gesch. Wochen",
+      "pace": "Tempo",
+      "trend_improving": "Verbessernd",
+      "trend_stable": "Stabil",
+      "trend_worsening": "Verschlechternd",
+      "trend_fast": "Schnell",
+      "weeks_unit": "Wochen"
+    },
+    "GoalSummaryCard": {
+      "cutting_phase": "Definitionsphase",
+      "bulking_phase": "Aufbauphase",
+      "body_fat": "Körperfett",
+      "target": "Ziel",
+      "ceiling": "Maximum",
+      "status": "Status",
+      "active": "Aktiv",
+      "progress_label": "Fortschritt"
+    }
+  },
+  "Progress": {
+    "title": "Fortschritt",
+    "subtitle": "Verfolgen Sie Ihre Körperrekompositionsreise.",
+    "loading": "Fortschritt wird geladen...",
+    "error_loading": "Fortschritt konnte nicht geladen werden",
+    "log_button": "Eintragen",
+    "no_progress_title": "Noch kein Fortschritt",
+    "no_progress_description": "Protokollieren Sie Ihre erste wöchentliche Messung, um Ihre Reise zu verfolgen.",
+    "log_first_entry": "Ersten Eintrag protokollieren",
+    "RecentLogs": {
+      "title": "Letzte Einträge",
+      "no_history": "Keine Verlaufseinträge gefunden.",
+      "fat_mass_label": "Fettmasse",
+      "lean_mass_label": "Muskelmasse",
+      "fat": "Fett",
+      "lean": "Muskel",
+      "edit_entry": "Eintrag bearbeiten"
+    },
+    "EditModal": {
+      "title": "Eintrag bearbeiten",
+      "week": "Woche",
+      "weight": "Gewicht",
+      "body_fat": "Körperfett",
+      "entry_date": "Datum",
+      "weight_label": "Gewicht (kg)",
+      "circumferences_title": "Umfangsmessungen",
+      "circumferences_hint": "Leer lassen, um aktuelle Werte beizubehalten. Körperfett wird neu berechnet.",
+      "waist_label": "Taille (cm)",
+      "neck_label": "Nacken (cm)",
+      "hip_label": "Hüfte (cm) - Nur Frauen",
+      "notes_label": "Notizen",
+      "notes_placeholder": "Wie haben Sie sich diese Woche gefühlt?",
+      "cancel": "Abbrechen",
+      "save": "Speichern",
+      "error_update": "Aktualisierung fehlgeschlagen"
+    },
+    "New": {
+      "title": "Wöchentlichen Fortschritt protokollieren",
+      "subtitle": "Konsistenz ist der Schlüssel zur Körperrekomposition.",
+      "loading": "Wird geladen...",
+      "error_no_goal": "Kein aktives Ziel gefunden. Bitte legen Sie zuerst ein Ziel fest.",
+      "error_submit_failed": "Fortschritt konnte nicht gesendet werden. Bitte versuchen Sie es erneut."
+    },
+    "Form": {
+      "Sections": {
+        "date_title": "Datum des Eintrags",
+        "date_description": "Falls bereits ein Eintrag für dieses Datum existiert, wird dieser ersetzt.",
+        "measurements_title": "Körpermaße",
+        "lifestyle_title": "Lebensstil & Gewohnheiten"
+      },
+      "Fields": {
+        "weight_label": "Gewicht (kg)",
+        "method_label": "Körperfett-Messmethode",
+        "neck_label": "Nacken (cm)",
+        "waist_label": "Taille (cm)",
+        "hip_label": "Hüfte (cm) – Optional",
+        "chest_label": "Brust (mm)",
+        "abdomen_label": "Bauch (mm)",
+        "thigh_label": "Oberschenkel (mm)",
+        "tricep_label": "Trizeps (mm)",
+        "suprailiac_label": "Suprailiacal (mm)",
+        "midaxillary_label": "Midaxillär (mm)",
+        "subscapular_label": "Subscapulär (mm)",
+        "energy_label": "Energieniveau (1-10)",
+        "stress_label": "Stresslevel (1-10)",
+        "sleep_label": "Schlafqualität (1-10)",
+        "adherence_label": "Diät-Einhaltung %",
+        "notes_label": "Notizen (Optional)",
+        "notes_placeholder": "Wie haben Sie sich diese Woche gefühlt?"
+      },
+      "Methods": {
+        "navy": "US Navy (Maßband)",
+        "3_site": "Hautfalte (3-Punkt)",
+        "7_site": "Hautfalte (7-Punkt)",
+        "skinfold_hint": "Männer: Brust, Bauch, Oberschenkel. Frauen: Trizeps, Suprailiacal, Oberschenkel."
+      },
+      "submit_button": "Fortschritt protokollieren"
+    }
+  },
+  "History": {
+    "title": "Ihr Fortschritt",
+    "subtitle": "Überprüfen Sie Ihre Reise und Trends.",
+    "loading": "Verlauf wird geladen...",
+    "error_loading": "Verlauf konnte nicht geladen werden",
+    "no_goal_found": "Kein aktives Ziel gefunden.",
+    "InsufficientData": {
+      "title": "Weiter so!",
+      "description": "Wir benötigen mindestens zwei Messungen, um Ihre Trends und Fortschrittsgeschwindigkeit zu berechnen. Denken Sie daran, Ihre Zahlen wöchentlich zu protokollieren."
+    },
+    "TrendCards": {
+      "pace": "Tempo",
+      "calculating": "Berechnung...",
+      "avg_weekly": "Wochenschnitt"
+    }
+  },
+  "Plans": {
+    "title": "Ihr Recomp-Plan",
+    "subtitle": "KI-generierte Empfehlungen basierend auf Ihrem aktuellen Ziel.",
+    "loading": "Plan wird geladen...",
+    "error_loading": "Pläne konnten nicht geladen werden",
+    "no_goal_found": "Kein aktives Ziel gefunden. Bitte legen Sie zuerst ein Ziel fest.",
+    "unavailable_title": "Plan nicht verfügbar",
+    "unavailable_description": "Ihr Plan wird noch generiert oder ist nicht verfügbar.",
+    "check_again": "Erneut prüfen",
+    "DailyTargets": {
+      "title": "Tagesziele",
+      "calories": "Kalorien",
+      "protein": "Protein",
+      "carbs": "Kohlenhydrate",
+      "fats": "Fette",
+      "calories_unit": "kcal",
+      "grams_unit": "g"
+    },
+    "TrainingPlan": {
+      "title": "Trainingsplan",
+      "no_plan": "Kein Trainingsplan verfügbar.",
+      "frequency": "Häufigkeit",
+      "per_week": "/ Woche",
+      "strength_training": "Krafttraining",
+      "progression": "Progression",
+      "notes": "Notizen",
+      "cardio": "Cardio",
+      "intensity": "Intensität",
+      "examples": "Beispiele",
+      "recovery": "Erholung",
+      "rest_days": "Ruhetage",
+      "sleep_target": "Schlafziel",
+      "hours": "Stunden",
+      "sets": "Sätze",
+      "reps": "Wdh.",
+      "rest": "Pause",
+      "plan_notes": "Anmerkungen zum Plan"
+    },
+    "DietPlan": {
+      "title": "Ernährungsplan",
+      "no_plan": "Kein Ernährungsplan verfügbar.",
+      "calories": "Kalorien",
+      "protein": "Protein",
+      "carbs": "Kohlenhydrate",
+      "fat": "Fett"
+    }
+  },
+  "Settings": {
+    "title": "Einstellungen",
+    "subtitle": "Verwalten Sie Ihr Konto und Ihre App-Einstellungen.",
+    "AccountProfile": {
+      "title": "Kontoprofil",
+      "session_status": "Sitzungsstatus"
+    },
+    "Preferences": {
+      "title": "Einstellungen",
+      "appearance": "Erscheinungsbild",
+      "light": "Hell",
+      "dark": "Dunkel",
+      "system": "System",
+      "language": "Sprache"
+    },
+    "DangerZone": {
+      "title": "Gefahrenzone",
+      "sign_out": "Abmelden",
+      "sign_out_description": "Dies wird Ihre sichere Sitzung auf diesem Gerät löschen. Sie müssen sich erneut anmelden, um auf Ihre Pläne und den Fortschrittsverlauf zuzugreifen."
+    }
+  },
+  "Onboarding": {
+    "title": "App-Einrichtung",
+    "subtitle": "Legen wir Ihre Ausgangsbasis fest",
+    "steps": {
+      "measure": "Messen",
+      "goal": "Ziel",
+      "done": "Fertig"
+    },
+    "MeasurementStep": {
+      "title": "Anfangsmessung",
+      "weight_label": "Gewicht (kg)",
+      "waist_label": "Taille (cm)",
+      "neck_label": "Nacken (cm)",
+      "hip_label": "Hüfte (cm) - Nur Frauen",
+      "submit_button": "Körperfett berechnen",
+      "error_save": "Speichern der Messung fehlgeschlagen. Werte prüfen."
+    },
+    "GoalStep": {
+      "title": "Setzen Sie Ihr Ziel",
+      "calculated_bf": "Berechneter Körperfettanteil",
+      "goal_type_label": "Zieltyp",
+      "cutting_label": "Definition (Fettabbau)",
+      "bulking_label": "Aufbau (Muskelaufbau)",
+      "target_bf_label": "Ziel Körperfett %",
+      "ceiling_bf_label": "Maximaler Körperfett %",
+      "submit_button": "Ziel bestätigen",
+      "errors": {
+        "measurement_missing": "Anfangsmessung fehlt. Berechnen Sie das Körperfett neu, bevor Sie ein Ziel festlegen.",
+        "measurement_invalid": "Anfangsmessung ungültig. Berechnen Sie das Körperfett neu, bevor Sie ein Ziel festlegen.",
+        "invalid_target_bf": "Geben Sie einen gültigen Ziel-Körperfettanteil für die Definitionsphase ein.",
+        "target_bf_higher": "Das Ziel-Körperfett muss niedriger als Ihr aktuelles Körperfett sein.",
+        "invalid_ceiling_bf": "Geben Sie einen gültigen maximalen Körperfettanteil für die Aufbauphase ein.",
+        "ceiling_bf_lower": "Das maximale Körperfett muss höher als Ihr aktuelles Körperfett sein.",
+        "fallback": "Zielerstellung fehlgeschlagen"
+      }
+    },
+    "SuccessPanel": {
+      "title": "Alles bereit!",
+      "description": "Ihre erste Analyse und Ziele wurden erfolgreich gespeichert.",
+      "dashboard_button": "Zum Dashboard"
+    }
+  },
+  "Auth": {
+    "Login": {
+      "title": "Willkommen zurück",
+      "subtitle": "Melden Sie sich an, um fortzufahren",
+      "email_label": "E-Mail",
+      "email_placeholder": "name@beispiel.de",
+      "password_label": "Passwort",
+      "password_placeholder": "••••••••",
+      "submit_button": "Anmelden",
+      "no_account": "Sie haben noch kein Konto?",
+      "register_link": "Registrieren",
+      "error_failed": "Anmeldung fehlgeschlagen"
+    },
+    "Register": {
+      "title": "Konto erstellen",
+      "subtitle": "Beginnen Sie heute Ihre Verwandlung",
+      "name_label": "Vollständiger Name",
+      "email_label": "E-Mail",
+      "password_label": "Passwort",
+      "dob_label": "Geburtsdatum",
+      "gender_label": "Geschlecht",
+      "height_label": "Größe (cm)",
+      "activity_label": "Aktivitätslevel",
+      "method_label": "Berechnungsmethode",
+      "submit_button": "Konto erstellen",
+      "already_have_account": "Sie haben bereits ein Konto?",
+      "login_link": "Anmelden",
+      "error_failed": "Registrierung fehlgeschlagen",
+      "Genders": {
+        "male": "Männlich",
+        "female": "Weiblich"
+      },
+      "ActivityLevels": {
+        "sedentary": "Sitzend",
+        "lightly_active": "Leicht aktiv",
+        "moderately_active": "Moderat aktiv",
+        "very_active": "Sehr aktiv",
+        "extremely_active": "Extrem aktiv"
+      },
+      "Methods": {
+        "navy": "US Navy",
+        "3_site": "Hautfalte (3-Punkt)",
+        "7_site": "Hautfalte (7-Punkt)"
+      }
+    }
+  }
+}
