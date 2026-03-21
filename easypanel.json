@@ -10,7 +10,8 @@
           "type": "github",
           "owner": "souza-vinicius",
           "repo": "body-recomp-backend",
-          "branch": "main"
+          "branch": "main",
+          "path": "/backend"
         },
         "build": {
           "type": "dockerfile",

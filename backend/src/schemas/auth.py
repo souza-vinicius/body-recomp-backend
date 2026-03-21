@@ -2,6 +2,9 @@
 Pydantic schemas for authentication.
 """
 from pydantic import BaseModel, EmailStr, Field
+from datetime import date
+from decimal import Decimal
+from src.models.enums import Gender, CalculationMethod, ActivityLevel
 
 
 class LoginRequest(BaseModel):
@@ -32,3 +35,21 @@ class TokenData(BaseModel):
     sub: str  # User ID
     exp: int  # Expiration timestamp
     type: str  # Token type (access or refresh)
+
+
+class GoogleLoginRequest(BaseModel):
+    """Schema for Google Login."""
+
+    credential: str = Field(..., description="Google JWT credential")
+
+
+class GoogleRegisterRequest(BaseModel):
+    """Schema for completing registration after Google SSO."""
+
+    credential: str = Field(..., description="Google JWT credential")
+    
+    date_of_birth: date
+    gender: Gender
+    height_cm: Decimal = Field(..., ge=120, le=250)
+    preferred_calculation_method: CalculationMethod
+    activity_level: ActivityLevel
