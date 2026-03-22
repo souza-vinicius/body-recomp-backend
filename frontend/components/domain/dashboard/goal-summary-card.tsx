@@ -51,7 +51,7 @@ export function GoalSummaryCard({ goal }: { goal: any }) {
             {current?.toFixed(1) || '?'}<span className="text-primary-500 text-2xl">%</span>
           </span>
           
-          <div className="mt-4 px-4 py-1.5 bg-surface-900/40 backdrop-blur-md rounded-full border border-white/5">
+          <div className="mt-4 px-4 py-1.5 bg-surface-50/40 backdrop-blur-md rounded-full border border-white/5">
             <span className="text-[0.6875rem] font-bold uppercase tracking-widest text-primary-500">
               {isCutting ? t('cutting_phase') : t('bulking_phase')}
             </span>

@@ -16,7 +16,7 @@ export function SubmitButton({
 }: SubmitButtonProps) {
   const variants = {
     primary: 'bg-gradient-primary text-white shadow-card hover:shadow-glow-orange active:scale-[0.98]',
-    secondary: 'bg-white text-surface-700 border-2 border-surface-200 hover:border-surface-300 hover:bg-surface-50 active:scale-[0.98]',
+    secondary: 'bg-surface-50 text-surface-700 border-2 border-surface-200 hover:border-surface-300 hover:bg-surface-100 active:scale-[0.98]',
     danger: 'bg-red-600 text-white hover:bg-red-700 active:scale-[0.98]',
   };
 

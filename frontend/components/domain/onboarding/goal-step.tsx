@@ -95,7 +95,7 @@ export function GoalStep({ onNext }: { onNext: () => void }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <div className="bg-surface-900 text-white p-5 rounded-xl text-center mb-6">
+      <div className="bg-surface-50 text-white p-5 rounded-xl text-center mb-6">
         <p className="text-xs text-surface-400 font-semibold uppercase tracking-wider">{t('calculated_bf_label')}</p>
         <p className="text-4xl font-black mt-1 text-primary-400">{data.calculated_bf?.toFixed(1)}%</p>
       </div>

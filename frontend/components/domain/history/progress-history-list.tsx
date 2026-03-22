@@ -72,10 +72,10 @@ export function ProgressHistoryList({ entries, onEntryUpdated }: ProgressHistory
             return (
               <div
                 key={entry.id}
-                className="bg-surface-900 rounded-xl p-4 flex items-center justify-between group hover:bg-surface-800 transition-colors border border-white/5 relative"
+                className="bg-surface-50 rounded-xl p-4 flex items-center justify-between group hover:bg-surface-100 transition-colors border border-white/5 relative"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-surface-800 border border-white/5 flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-surface-100 border border-white/5 flex items-center justify-center flex-shrink-0">
                     {getIcon(index)}
                   </div>
                   <div>
@@ -99,7 +99,7 @@ export function ProgressHistoryList({ entries, onEntryUpdated }: ProgressHistory
                 
                 <button
                   onClick={() => setEditingEntry(entry)}
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 flex items-center justify-center bg-surface-900/80 backdrop-blur-sm transition-opacity rounded-xl"
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 flex items-center justify-center bg-surface-50/80 backdrop-blur-sm transition-opacity rounded-xl"
                   title={t('edit_entry')}
                 >
                   <div className="bg-primary-500 text-black px-4 py-2 rounded-full flex items-center gap-2 font-bold text-xs uppercase tracking-widest shadow-glow-orange">

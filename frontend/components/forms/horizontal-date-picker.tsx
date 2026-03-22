@@ -46,7 +46,7 @@ export function HorizontalDatePicker({ value, onChange }: HorizontalDatePickerPr
               className={`flex flex-col items-center min-w-[3.5rem] py-3 rounded-xl transition-all ${
                 isSelected
                   ? 'bg-primary-500 text-black shadow-glow-orange scale-110'
-                  : 'bg-surface-900 text-surface-400 hover:bg-surface-800 border border-white/5'
+                  : 'bg-surface-50 text-surface-400 hover:bg-surface-100 border border-white/5'
               }`}
             >
               <span className="text-[10px] uppercase tracking-tighter mb-1 font-bold">

@@ -18,7 +18,7 @@ export function KpiCards({ trends }: { trends: any }) {
 
   return (
     <div className="grid grid-cols-2 gap-4">
-      <div className="bg-surface-900 p-6 rounded-xl flex flex-col justify-between h-40 border border-white/5">
+      <div className="bg-surface-50 p-6 rounded-xl flex flex-col justify-between h-40 border border-white/5">
         <span className="text-[0.6875rem] uppercase tracking-[0.05em] text-surface-400 leading-tight">
           {t('est_weeks')}
         </span>
@@ -28,7 +28,7 @@ export function KpiCards({ trends }: { trends: any }) {
           </span>
         </div>
       </div>
-      <div className="bg-surface-900 p-6 rounded-xl flex flex-col justify-between h-40 border border-white/5">
+      <div className="bg-surface-50 p-6 rounded-xl flex flex-col justify-between h-40 border border-white/5">
         <span className="text-[0.6875rem] uppercase tracking-[0.05em] text-surface-400 leading-tight">
           {t('pace')}
         </span>

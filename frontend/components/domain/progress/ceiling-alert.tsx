@@ -15,13 +15,13 @@ export function CeilingAlert({ currentBodyFat }: CeilingAlertProps) {
   return (
     <div className={`p-4 rounded-xl border flex items-start gap-3 animate-fade-in ${
       isOverCeiling
-        ? 'bg-red-50 border-red-200 text-red-900'
-        : 'bg-amber-50 border-amber-200 text-amber-900'
+        ? 'bg-red-950/40 border-red-500/30 text-red-100'
+        : 'bg-amber-950/40 border-amber-500/30 text-amber-100'
     }`}>
       <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
-        isOverCeiling ? 'bg-red-100' : 'bg-amber-100'
+        isOverCeiling ? 'bg-red-900/40' : 'bg-amber-900/40'
       }`}>
-        <AlertTriangle size={18} className={isOverCeiling ? 'text-red-600' : 'text-amber-600'} />
+        <AlertTriangle size={18} className={isOverCeiling ? 'text-red-400' : 'text-amber-400'} />
       </div>
       <div>
         <h4 className="font-bold text-sm">

@@ -54,7 +54,7 @@ export function ProgressEntryForm({ onSubmit, isLoading, initialMethod = BodyFat
 
       <section className="grid grid-cols-2 gap-4">
         {/* Weight Card - Span 2 */}
-        <div className="col-span-2 bg-surface-900/40 backdrop-blur-[20px] rounded-[2rem] p-6 border border-white/5 relative overflow-hidden group">
+        <div className="col-span-2 bg-surface-50/40 backdrop-blur-[20px] rounded-[2rem] p-6 border border-white/5 relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-4 opacity-10 group-focus-within:opacity-30 transition-opacity">
             <Activity size={60} className="text-primary-500" />
           </div>
@@ -75,7 +75,7 @@ export function ProgressEntryForm({ onSubmit, isLoading, initialMethod = BodyFat
         </div>
 
         {/* Neck Card */}
-        <div className="bg-surface-900/40 backdrop-blur-[20px] rounded-[2rem] p-6 border border-white/5 relative overflow-hidden group">
+        <div className="bg-surface-50/40 backdrop-blur-[20px] rounded-[2rem] p-6 border border-white/5 relative overflow-hidden group">
           <label className="block text-[10px] font-bold tracking-[0.1em] text-surface-400 uppercase mb-2">
             {t('Fields.neck_label')}
           </label>
@@ -93,7 +93,7 @@ export function ProgressEntryForm({ onSubmit, isLoading, initialMethod = BodyFat
         </div>
 
         {/* Waist Card */}
-        <div className="bg-surface-900/40 backdrop-blur-[20px] rounded-[2rem] p-6 border border-white/5 relative overflow-hidden group">
+        <div className="bg-surface-50/40 backdrop-blur-[20px] rounded-[2rem] p-6 border border-white/5 relative overflow-hidden group">
           <label className="block text-[10px] font-bold tracking-[0.1em] text-surface-400 uppercase mb-2">
             {t('Fields.waist_label')}
           </label>
@@ -123,7 +123,7 @@ export function ProgressEntryForm({ onSubmit, isLoading, initialMethod = BodyFat
           <input 
             type="range" min="1" max="10" 
             value={energyLevel} onChange={e => setEnergyLevel(Number(e.target.value))}
-            className="w-full h-2 bg-surface-800 rounded-lg appearance-none cursor-pointer accent-primary-500"
+            className="w-full h-2 bg-surface-100 rounded-lg appearance-none cursor-pointer accent-primary-500"
           />
           <div className="flex justify-between mt-2">
             <span className="text-[9px] font-bold text-surface-400 uppercase tracking-widest">Low</span>
@@ -144,7 +144,7 @@ export function ProgressEntryForm({ onSubmit, isLoading, initialMethod = BodyFat
                 className={`flex-1 py-3 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
                   sleepQuality === quality 
                     ? 'bg-primary-500 text-black shadow-[0_0_15px_rgba(249,115,22,0.3)] scale-105' 
-                    : 'bg-surface-900 border border-white/5 text-surface-400 hover:bg-surface-800'
+                    : 'bg-surface-50 border border-white/5 text-surface-400 hover:bg-surface-100'
                 }`}
               >
                 {quality}
@@ -163,7 +163,7 @@ export function ProgressEntryForm({ onSubmit, isLoading, initialMethod = BodyFat
           <input 
             type="range" min="1" max="10" 
             value={stressLevel} onChange={e => setStressLevel(Number(e.target.value))}
-            className="w-full h-2 bg-surface-800 rounded-lg appearance-none cursor-pointer accent-primary-500"
+            className="w-full h-2 bg-surface-100 rounded-lg appearance-none cursor-pointer accent-primary-500"
           />
         </div>
       </section>
@@ -176,7 +176,7 @@ export function ProgressEntryForm({ onSubmit, isLoading, initialMethod = BodyFat
           id="notes"
           name="notes"
           rows={3}
-          className="w-full p-4 bg-surface-900/40 rounded-2xl border border-white/5 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none resize-none font-medium text-sm text-white placeholder-surface-500 transition-all"
+          className="w-full p-4 bg-surface-50/40 rounded-2xl border border-white/5 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none resize-none font-medium text-sm text-white placeholder-surface-500 transition-all"
           placeholder={t('Fields.notes_placeholder')}
         />
       </div>

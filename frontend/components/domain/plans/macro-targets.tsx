@@ -12,10 +12,10 @@ export function MacroTargets({ dietPlan }: MacroTargetsProps) {
   if (!dietPlan) return null;
 
   const macros = [
-    { label: t('calories'), value: dietPlan.daily_calorie_target, unit: t('calories_unit'), icon: Flame, bg: 'bg-surface-900', iconColor: 'text-primary-400', textColor: 'text-white' },
-    { label: t('protein'), value: dietPlan.protein_grams, unit: t('grams_unit'), icon: Beef, bg: 'bg-red-50', iconColor: 'text-red-500', textColor: 'text-red-900' },
-    { label: t('carbs'), value: dietPlan.carbs_grams, unit: t('grams_unit'), icon: Wheat, bg: 'bg-amber-50', iconColor: 'text-amber-500', textColor: 'text-amber-900' },
-    { label: t('fats'), value: dietPlan.fat_grams, unit: t('grams_unit'), icon: Droplets, bg: 'bg-blue-50', iconColor: 'text-blue-500', textColor: 'text-blue-900' },
+    { label: t('calories'), value: dietPlan.daily_calorie_target, unit: t('calories_unit'), icon: Flame, bg: 'bg-surface-50', iconColor: 'text-primary-400', textColor: 'text-white' },
+    { label: t('protein'), value: dietPlan.protein_grams, unit: t('grams_unit'), icon: Beef, bg: 'bg-red-950/20', iconColor: 'text-red-400', textColor: 'text-red-100' },
+    { label: t('carbs'), value: dietPlan.carbs_grams, unit: t('grams_unit'), icon: Wheat, bg: 'bg-amber-950/20', iconColor: 'text-amber-400', textColor: 'text-amber-100' },
+    { label: t('fats'), value: dietPlan.fat_grams, unit: t('grams_unit'), icon: Droplets, bg: 'bg-blue-950/20', iconColor: 'text-blue-400', textColor: 'text-blue-100' },
   ];
 
   return (

@@ -126,11 +126,11 @@ export function TrainingPlanPanel({ trainingPlan }: TrainingPlanPanelProps) {
             </div>
             
             <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="p-4 bg-white rounded-xl border border-surface-100 shadow-sm text-center">
+              <div className="p-4 bg-surface-50 rounded-xl border border-surface-100 shadow-sm text-center">
                 <span className="text-xs font-semibold text-surface-400 block mb-1 uppercase tracking-wider">{t('rest_days')}</span>
                 <span className="text-xl font-black text-surface-900">{details.recovery.rest_days} <span className="text-xs font-medium text-surface-400">{t('per_week')}</span></span>
               </div>
-              <div className="p-4 bg-white rounded-xl border border-surface-100 shadow-sm text-center">
+              <div className="p-4 bg-surface-50 rounded-xl border border-surface-100 shadow-sm text-center">
                 <span className="text-xs font-semibold text-surface-400 block mb-1 uppercase tracking-wider">{t('sleep_target')}</span>
                 <span className="text-xl font-black text-surface-900">{details.recovery.sleep_target.split(' ')[0]} <span className="text-xs font-medium text-surface-400">{t('hours')}</span></span>
               </div>

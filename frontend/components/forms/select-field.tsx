@@ -16,7 +16,7 @@ export function SelectField({ label, options, error, className = '', id, ...prop
       <div className="relative">
         <select
           id={id}
-          className={`w-full appearance-none px-3.5 py-2.5 pr-10 text-sm bg-white border-2 rounded-xl shadow-sm transition-all duration-200
+          className={`w-full appearance-none px-3.5 py-2.5 pr-10 text-sm bg-surface-50 border-2 rounded-xl shadow-sm transition-all duration-200
             focus:outline-none focus:ring-0
             ${error
               ? 'border-red-400 focus:border-red-500 text-red-900 bg-red-50/50'

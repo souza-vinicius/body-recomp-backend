@@ -13,7 +13,7 @@ export function TextField({ label, error, className = '', id, ...props }: TextFi
       </label>
       <input
         id={id}
-        className={`px-3.5 py-2.5 text-sm bg-white border-2 rounded-xl shadow-sm transition-all duration-200 
+        className={`px-3.5 py-2.5 text-sm bg-surface-50 border-2 rounded-xl shadow-sm transition-all duration-200 
           focus:outline-none focus:ring-0
           ${error
             ? 'border-red-400 focus:border-red-500 text-red-900 bg-red-50/50'

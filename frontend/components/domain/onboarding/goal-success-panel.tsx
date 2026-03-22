@@ -11,7 +11,7 @@ export function GoalSuccessPanel() {
 
   return (
     <div className="text-center space-y-6 py-6 animate-scale-in">
-      <div className="mx-auto w-20 h-20 bg-green-100 flex items-center justify-center rounded-2xl">
+      <div className="mx-auto w-20 h-20 bg-green-900/40 flex items-center justify-center rounded-2xl">
         <CheckCircle2 size={36} className="text-green-600" />
       </div>
       

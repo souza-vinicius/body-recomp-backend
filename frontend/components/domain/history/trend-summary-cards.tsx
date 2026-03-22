@@ -28,7 +28,7 @@ export function TrendSummaryCards({ trends }: TrendSummaryCardsProps) {
 
   return (
     <section className="grid grid-cols-2 gap-4 mb-12">
-      <div className="bg-surface-900/40 backdrop-blur-[20px] p-6 rounded-3xl border border-white/5 flex flex-col justify-between aspect-square">
+      <div className="bg-surface-50/40 backdrop-blur-[20px] p-6 rounded-3xl border border-white/5 flex flex-col justify-between aspect-square">
         <div>
           <Activity className="text-primary-500 leading-none mb-4 block" size={24} />
           <h3 className="text-[10px] uppercase tracking-widest text-surface-400 font-bold leading-tight">
@@ -40,7 +40,7 @@ export function TrendSummaryCards({ trends }: TrendSummaryCardsProps) {
         </div>
       </div>
       
-      <div className="bg-surface-900/40 backdrop-blur-[20px] p-6 rounded-3xl border border-white/5 flex flex-col justify-between aspect-square">
+      <div className="bg-surface-50/40 backdrop-blur-[20px] p-6 rounded-3xl border border-white/5 flex flex-col justify-between aspect-square">
         <div>
           {isLosing ? (
              <TrendingDown className="text-primary-500 leading-none mb-4 block" size={24} />

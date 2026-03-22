@@ -10,13 +10,13 @@ export function ErrorState({
   onRetry?: () => void;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center p-8 gap-4 text-center rounded-2xl bg-red-50 border border-red-100 animate-fade-in">
-      <div className="w-14 h-14 rounded-2xl bg-red-100 flex items-center justify-center">
+    <div className="flex flex-col items-center justify-center p-8 gap-4 text-center rounded-2xl bg-red-950/20 border border-red-900/30 animate-fade-in">
+      <div className="w-14 h-14 rounded-2xl bg-red-900/40 flex items-center justify-center">
         <AlertTriangle size={24} className="text-red-500" />
       </div>
       <div>
-        <h3 className="text-lg font-bold text-red-800">{title}</h3>
-        <p className="text-sm text-red-600 max-w-sm mt-1">{message}</p>
+        <h3 className="text-lg font-bold text-red-400">{title}</h3>
+        <p className="text-sm text-red-300/80 max-w-sm mt-1">{message}</p>
       </div>
       {onRetry && (
         <button 

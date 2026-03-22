@@ -22,7 +22,7 @@ export function ProgressSubmitFeedback({ summary, onClose }: ProgressSubmitFeedb
 
   return (
     <div className="card p-8 text-center max-w-md mx-auto space-y-6 shadow-elevated">
-      <div className="w-20 h-20 mx-auto rounded-2xl bg-green-100 flex items-center justify-center">
+      <div className="w-20 h-20 mx-auto rounded-2xl bg-green-900/40 flex items-center justify-center">
         <CheckCircle2 size={36} className="text-green-600" />
       </div>
 
