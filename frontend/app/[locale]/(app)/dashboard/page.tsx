@@ -6,6 +6,7 @@ import { GoalSummaryCard } from '@/components/domain/dashboard/goal-summary-card
 import { KpiCards } from '@/components/domain/dashboard/kpi-cards';
 import { NoGoalPanel } from '@/components/domain/dashboard/no-goal-panel';
 import { QuickActions } from '@/components/domain/dashboard/quick-actions';
+import { RecommendedWorkout } from '@/components/domain/dashboard/recommended-workout';
 import { LoadingState } from '@/components/feedback/loading-state';
 import { ErrorState } from '@/components/feedback/error-state';
 import { DashboardStore } from '@/lib/state/dashboard-store';
@@ -49,20 +50,22 @@ export default function DashboardPage() {
   if (error) return <ErrorState message={error} onRetry={() => window.location.reload()} />;
 
   return (
-    <div className="space-y-6 animate-slide-up">
-      <div className="page-header">
-        <p className="text-sm font-medium text-primary-600">{t(greetingKey)} 👋</p>
-        <h1 className="page-title">{t('title')}</h1>
+    <div className="animate-slide-up pb-32">
+      <div className="flex items-center gap-3 mb-10 mt-2">
+        <h1 className="font-bold text-xl tracking-tight text-primary-500">
+           {t(greetingKey)}
+        </h1>
       </div>
       
       {!data?.goal ? (
         <NoGoalPanel />
       ) : (
-        <>
+        <div className="space-y-10">
           <GoalSummaryCard goal={data.goal} />
           {data.trends && <KpiCards trends={data.trends} />}
           <QuickActions />
-        </>
+          <RecommendedWorkout />
+        </div>
       )}
     </div>
   );

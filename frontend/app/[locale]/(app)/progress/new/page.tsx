@@ -95,15 +95,7 @@ export default function NewProgressPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 animate-slide-up">
-      <div className="page-header">
-        <div className="flex items-center gap-2">
-          <Dumbbell size={22} className="text-primary-500" />
-          <h1 className="page-title">{t('title')}</h1>
-        </div>
-        <p className="page-subtitle mt-1">{t('subtitle')}</p>
-      </div>
-
+    <div className="max-w-2xl mx-auto space-y-6 animate-slide-up pb-32">
       <CeilingAlert currentBodyFat={currentBodyFat} />
 
       {error && (

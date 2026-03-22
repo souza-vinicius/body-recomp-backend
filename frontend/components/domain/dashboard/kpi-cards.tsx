@@ -1,5 +1,4 @@
 import React from 'react';
-import { Timer, Activity } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 export function KpiCards({ trends }: { trends: any }) {
@@ -19,25 +18,22 @@ export function KpiCards({ trends }: { trends: any }) {
 
   return (
     <div className="grid grid-cols-2 gap-4">
-      <div className="stat-card flex items-start gap-3 p-4 bg-surface-white border border-surface-100 shadow-sm rounded-2xl">
-        <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center flex-shrink-0">
-          <Timer size={20} className="text-primary-600" />
-        </div>
-        <div>
-          <span className="text-[10px] font-bold text-surface-400 uppercase tracking-widest block mb-1">{t('est_weeks')}</span>
-          <span className="text-xl font-black text-surface-900 block leading-none">
+      <div className="bg-surface-900 p-6 rounded-xl flex flex-col justify-between h-40 border border-white/5">
+        <span className="text-[0.6875rem] uppercase tracking-[0.05em] text-surface-400 leading-tight">
+          {t('est_weeks')}
+        </span>
+        <div className="text-right">
+          <span className="font-bold text-5xl text-white">
             {trends.estimated_weeks_remaining ?? '--'}
-            <span className="text-xs font-medium text-surface-400 ml-1.5 lowercase">{t('weeks_unit')}</span>
           </span>
         </div>
       </div>
-      <div className="stat-card flex items-start gap-3 p-4 bg-surface-white border border-surface-100 shadow-sm rounded-2xl">
-        <div className="w-10 h-10 rounded-xl bg-surface-900 flex items-center justify-center flex-shrink-0">
-          <Activity size={20} className="text-white" />
-        </div>
-        <div>
-          <span className="text-[10px] font-bold text-surface-400 uppercase tracking-widest block mb-1">{t('pace')}</span>
-          <span className="text-xl font-black text-surface-900 block leading-none truncate max-w-[120px]">
+      <div className="bg-surface-900 p-6 rounded-xl flex flex-col justify-between h-40 border border-white/5">
+        <span className="text-[0.6875rem] uppercase tracking-[0.05em] text-surface-400 leading-tight">
+          {t('pace')}
+        </span>
+        <div className="text-right">
+          <span className="font-bold text-2xl text-primary-500 leading-tight line-clamp-2">
             {formatTrend(trends.trend)}
           </span>
         </div>

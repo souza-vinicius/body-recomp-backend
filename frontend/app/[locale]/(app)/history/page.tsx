@@ -67,22 +67,42 @@ export default function HistoryPage() {
 
   const hasEnoughData = entries.length > 1;
 
+  const currentBodyFat = entries.length > 0 ? entries[0].body_fat_percentage : 0;
+  let bfChange = 0;
+  if (entries.length > 1) {
+    // compare with an entry from roughly a month ago, or oldest if less than a month
+    const oldestIdx = Math.min(entries.length - 1, 4);
+    bfChange = currentBodyFat - entries[oldestIdx].body_fat_percentage;
+  }
+
   return (
-    <div className="space-y-8 animate-slide-up">
-      <div className="page-header">
-        <div className="flex items-center gap-2">
-          <Clock size={22} className="text-primary-500" />
-          <h1 className="page-title">{t('title')}</h1>
+    <div className="space-y-8 animate-slide-up pb-32">
+      {hasEnoughData && (
+      <section className="mb-8 pt-4">
+        <label className="font-bold text-xs uppercase tracking-[0.2em] text-surface-400 mb-2 block">
+          {t('title') || 'Current Status'}
+        </label>
+        <div className="flex items-baseline gap-2">
+          <h2 className="font-bold text-6xl tracking-tight text-white editorial-kerning">
+            {currentBodyFat}<span className="text-primary-500 text-3xl">%</span>
+          </h2>
+          {bfChange !== 0 && (
+            <div className={`flex items-center mb-1 ${bfChange < 0 ? 'text-primary-500' : 'text-surface-400'}`}>
+              <span className="text-sm font-bold tracking-wide">
+                {bfChange > 0 ? '+' : ''}{bfChange.toFixed(1)}% {t('subtitle') || 'trend'}
+              </span>
+            </div>
+          )}
         </div>
-        <p className="page-subtitle mt-1">{t('subtitle')}</p>
-      </div>
+      </section>
+      )}
 
       {!hasEnoughData ? (
         <InsufficientDataPanel />
       ) : (
         <>
-          <TrendSummaryCards trends={trends} />
           <BodyFatTrendChart entries={entries} />
+          <TrendSummaryCards trends={trends} />
         </>
       )}
 
