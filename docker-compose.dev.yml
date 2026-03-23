@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # PostgreSQL Database (Dev)
   db:
     image: postgres:15-alpine
     container_name: body-recomp-db-dev
@@ -13,13 +14,14 @@ services:
     volumes:
       - postgres_data_dev:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
-      - body-recomp-network-dev
+      - internal-dev
 
+  # FastAPI Backend (Dev)
   api:
     build:
       context: backend
@@ -35,16 +37,41 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-body_recomp}
       DEBUG: "true"
+      ALLOWED_ORIGINS: "http://localhost:3000"
     depends_on:
       db:
         condition: service_healthy
     networks:
-      - body-recomp-network-dev
+      - internal-dev
+
+  # Next.js Frontend (Dev)
+  web:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+      target: deps
+    container_name: body-recomp-web-dev
+    command: npm run dev
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_PUBLIC_IS_CAPACITOR: "false"
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - internal-dev
 
 volumes:
   postgres_data_dev:
     driver: local
 
 networks:
-  body-recomp-network-dev:
+  internal-dev:
     driver: bridge

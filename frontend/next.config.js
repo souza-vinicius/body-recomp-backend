@@ -3,8 +3,8 @@ const withNextIntl = require('next-intl/plugin')('./i18n.ts');
 
 const nextConfig = {
   reactStrictMode: true,
-  /* output: 'export' for Capacitor */
-  output: process.env.NEXT_PUBLIC_IS_CAPACITOR === 'true' ? 'export' : undefined,
+  /* output: 'export' for Capacitor, 'standalone' for Docker */
+  output: process.env.NEXT_PUBLIC_IS_CAPACITOR === 'true' ? 'export' : 'standalone',
   images: {
     unoptimized: process.env.NEXT_PUBLIC_IS_CAPACITOR === 'true',
   }

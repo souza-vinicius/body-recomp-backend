@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # PostgreSQL Database
   db:
     image: postgres:15-alpine
     container_name: body-recomp-db
@@ -8,51 +9,97 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-body_recomp}
-    ports:
-      - "5433:5432"
+    command: >
+      postgres -c shared_buffers=512MB -c effective_cache_size=1536MB -c maintenance_work_mem=128MB -c checkpoint_completion_target=0.9 -c wal_buffers=16MB -c default_statistics_target=100 -c random_page_cost=1.1 -c effective_io_concurrency=200 -c work_mem=2621kB -c min_wal_size=1GB -c max_wal_size=4GB -c max_connections=50
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 10s
       timeout: 5s
       retries: 5
-    restart: unless-stopped
     networks:
-      - body-recomp-network
+      - internal
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
 
+  # FastAPI Backend
   api:
     build:
       context: backend
       dockerfile: Dockerfile
     container_name: body-recomp-api
-    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000
-    ports:
-      - "8000:8000"
-    env_file:
-      - .env
     environment:
+      PYTHONUNBUFFERED: 1
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-body_recomp}
       SECRET_KEY: ${SECRET_KEY}
       DEBUG: ${DEBUG:-false}
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://${WEB_DOMAIN:-mybulking.com}}
+      UVICORN_WORKERS: ${UVICORN_WORKERS:-2}
     depends_on:
       db:
         condition: service_healthy
-    # healthcheck:
-    #   test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 3
-    #   start_period: 40s
-    restart: unless-stopped
     networks:
-      - body-recomp-network
+      - internal
+      - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.bodyrecomp-api.rule=Host(`api.mybulking.com`)"
+      - "traefik.http.routers.bodyrecomp-api.entrypoints=websecure"
+      - "traefik.http.routers.bodyrecomp-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.bodyrecomp-api.loadbalancer.server.port=8000"
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  # Next.js Frontend
+  web:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.mybulking.com}
+        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-}
+        NEXT_PUBLIC_IS_CAPACITOR: "false"
+    container_name: body-recomp-web
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - internal
+      - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.bodyrecomp-web.rule=Host(`mybulking.com`) || Host(`mybulking.com.br`)"
+      - "traefik.http.routers.bodyrecomp-web.entrypoints=websecure"
+      - "traefik.http.routers.bodyrecomp-web.tls.certresolver=letsencrypt"
+      - "traefik.http.services.bodyrecomp-web.loadbalancer.server.port=3000"
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
 
 volumes:
   postgres_data:
     driver: local
 
 networks:
-  body-recomp-network:
+  internal:
     driver: bridge
+  dokploy-network:
+    external: true
