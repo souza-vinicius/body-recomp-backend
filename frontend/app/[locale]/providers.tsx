@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuthStore } from '../../lib/state/auth-store';
+import { useAuthStore } from '@/lib/state/auth-store';
 import { useEffect } from 'react';
 import { ThemeProvider } from 'next-themes';
 import { GoogleOAuthProvider } from '@react-oauth/google';
