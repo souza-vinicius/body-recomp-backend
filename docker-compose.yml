@@ -34,6 +34,7 @@ services:
       context: backend
       dockerfile: Dockerfile
     container_name: body-recomp-api
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port ${API_PORT:-8000}
     environment:
       PYTHONUNBUFFERED: 1
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-body_recomp}
@@ -52,7 +53,7 @@ services:
       - "traefik.http.routers.bodyrecomp-api.rule=Host(`api.mybulking.com`)"
       - "traefik.http.routers.bodyrecomp-api.entrypoints=websecure"
       - "traefik.http.routers.bodyrecomp-api.tls.certresolver=letsencrypt"
-      - "traefik.http.services.bodyrecomp-api.loadbalancer.server.port=8000"
+      - "traefik.http.services.bodyrecomp-api.loadbalancer.server.port=${API_PORT:-8000}"
     restart: always
     deploy:
       resources:
@@ -73,7 +74,7 @@ services:
     container_name: body-recomp-web
     environment:
       NODE_ENV: production
-      PORT: 3000
+      PORT: ${WEB_PORT:-3000}
     depends_on:
       api:
         condition: service_started
@@ -85,7 +86,7 @@ services:
       - "traefik.http.routers.bodyrecomp-web.rule=Host(`mybulking.com`) || Host(`mybulking.com.br`)"
       - "traefik.http.routers.bodyrecomp-web.entrypoints=websecure"
       - "traefik.http.routers.bodyrecomp-web.tls.certresolver=letsencrypt"
-      - "traefik.http.services.bodyrecomp-web.loadbalancer.server.port=3000"
+      - "traefik.http.services.bodyrecomp-web.loadbalancer.server.port=${WEB_PORT:-3000}"
     restart: always
     deploy:
       resources:
