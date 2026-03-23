@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     VERSION: str = "0.1.0"
 
     # CORS Configuration
-    ALLOWED_ORIGINS: list[str] = [
+    ALLOWED_ORIGINS: Union[str, list[str]] = [
         "http://localhost:3000",
         "http://localhost:3001",
         "http://localhost:8000",
